@@ -157,7 +157,7 @@ public class AndLess extends Activity implements Comparator<File> {
     				}
     				srv.registerCallback(cBack);
     			} catch(RemoteException e) {log_msg("remote exception in onServiceConnected: " + e.toString()); }
-    		//	Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
+    			Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
     		//	Process.setThreadPriority(-19	);
     		}
     		public void onServiceDisconnected(ComponentName cn) { 
@@ -1282,7 +1282,7 @@ public class AndLess extends Activity implements Comparator<File> {
     	    	return null;
         	}
     	}
-
+    	
     	private boolean playPlaylist(File fpath) {
 	        ArrayList<String> filez = parsePlaylist(fpath);
 	        if(filez == null) return false;
