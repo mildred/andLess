@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_height="wrap_content" android:orientation="vertical" android:layout_width="wrap_content" android:minWidth="150px">
+
+<Button android:layout_height="wrap_content" android:text="@string/strSave" android:id="@+id/ButtonSave" android:layout_width="fill_parent"></Button>
+<Button android:layout_height="wrap_content" android:id="@+id/ButtonTop" android:text="@string/strMoveToTop" android:layout_width="fill_parent"></Button>
+<Button android:layout_height="wrap_content" android:id="@+id/ButtonUp" android:text="@string/strUp" android:layout_width="fill_parent"></Button>
+<Button android:layout_height="wrap_content" android:id="@+id/ButtonDown" android:text="@string/strDown" android:layout_width="fill_parent"></Button>
+<Button android:layout_height="wrap_content" android:id="@+id/ButtonBottom" android:text="@string/strMoveToBottom" android:layout_width="fill_parent"></Button>
+<Button android:layout_height="wrap_content" android:id="@+id/ButtonDelete" android:text="@string/strDelete" android:layout_width="fill_parent"></Button>
+<Button android:layout_height="wrap_content" android:id="@+id/ButtonCancel" android:text="@string/strCancel" android:layout_width="fill_parent"></Button>
+
+</LinearLayout>

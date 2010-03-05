@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout 
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:id="@+id/LinearLayout01" 
+android:orientation="vertical"
+android:layout_width="fill_parent" 
+android:layout_height="fill_parent">
+
+<ProgressBar android:id="@+id/PBar" 
+style="?android:attr/progressBarStyleHorizontal"
+android:layout_width="fill_parent"
+android:layout_height="8px">
+</ProgressBar>
+
+<LinearLayout 
+android:orientation="horizontal"
+android:id="@+id/LinearLayout02" 
+android:layout_height="wrap_content" 
+android:layout_width="fill_parent" android:background="#cccccc">
+
+<Button android:layout_width="wrap_content" android:layout_height="fill_parent" 
+android:id="@+id/ButtonQuit" android:layout_weight="20" android:background="@drawable/btn_quit">
+</Button>
+
+<Button android:layout_width="wrap_content" 
+android:layout_height="wrap_content" 
+android:id="@+id/ButtonVMinus" android:layout_weight="1" android:background="@drawable/vol_minus">
+</Button>
+
+<Button 
+android:layout_width="wrap_content" 
+android:layout_height="wrap_content" 
+android:id="@+id/ButtonVPlus" android:layout_weight="1" android:background="@drawable/vol_plus">
+</Button>
+
+<Button android:layout_width="wrap_content" 
+android:layout_height="wrap_content" 
+android:id="@+id/ButtonPrev" android:layout_weight="1" android:background="@drawable/go_prev_32">
+</Button>
+
+<Button android:layout_width="wrap_content" 
+android:layout_height="wrap_content" 
+android:id="@+id/ButtonNext" android:layout_weight="1" android:background="@drawable/go_next_32">
+</Button>
+
+<Button android:layout_width="wrap_content" 
+android:layout_height="wrap_content" 
+android:id="@+id/ButtonPause" android:layout_weight="1" android:background="@drawable/img_pause">
+</Button>
+
+<Button 
+android:layout_width="wrap_content" 
+android:layout_height="wrap_content" android:id="@+id/ButtonUp" android:layout_weight="1" android:background="@drawable/go_up_32">
+</Button>
+
+</LinearLayout>
+
+<ListView 
+android:orientation="horizontal"
+android:layout_height="fill_parent" 
+android:layout_width="fill_parent"
+android:id="@+id/FileList">
+</ListView>
+
+</LinearLayout>

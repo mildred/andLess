@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+<string name="noSdCard">No SD card present, exiting.</string>
+<string name="app_name">andLess</string>
+<string name="quitApp">Quit</string>
+<string name="exiting">Exiting!</string>
+<string name="strAll">All </string>
+<string name="strUp">Up</string>
+<string name="strCantInit">Cannot initialize, exiting.</string>
+<string name="strPause">Pause</string>
+<string name="quitAppSrv">Stop Service &amp; Quit </string>
+<string name="strStopped">[Stopped]</string>
+<string name="strPaused">[Paused]</string>
+<string name="strPlaying">[Playing]</string>
+<string name="strSettings">Settings</string>
+<string name="strFont">Font size</string>
+<string name="strColor">Theme</string>
+<string name="strNormal">Black theme</string>
+<string name="strInverse">Light theme</string>
+<string-array name="Errors">
+<item>Initialization error</item>
+<item>Invalid parameter</item>
+<item>Error opening file</item>
+<item>Bad or unsupported file format</item>
+<item>Get audio config error</item>
+<item>Set audio config error</item>
+<item>Audio buffer error</item>
+<item>Audio setup error</item>
+<item>Cannot start audio</item>
+<item>Write error</item>
+<item>Read error</item>
+<item>Decoder error</item>
+<item>Invalid time offset</item>
+<item>Out of memory</item>
+<item>Initialization error</item>
+</string-array>
+<string name="strBlueTheme">Blue theme</string>
+<string name="strUpLayout">Buttons above</string>
+<string name="strDownLayout">Buttons below</string>
+<string name="strLayout">Layout</string>
+<string name="strNoFiles">Nothing interesting here</string>
+
+<string name="strCantSetup">Cannot setup interface!</string>
+<string name="strBadPlist">Empty or invalid playlist</string>
+<string name="strBadCue">CUE file not recognized or not supported</string>
+<string name="strShuffle">Shuffle all playlists</string>
+<string name="strSrvFail">Server failure!</string>
+<string name="strNoCueSrc">CUE file references non-existing source</string>
+<string name="strCueSrcExt">CUE file references source file with unsupported extension</string>
+<string name="strTurnOffShuffle">To edit playlist, please turn off shuffle mode first!</string>
+<string name="strSave">Save</string>
+<string name="strCancel">Cancel</string>
+<string name="strDown">Down</string>
+<string name="strDelete">Delete</string>
+<string name="strCurRow">Row = </string>
+<string name="strDeleted">Deleted</string>
+<string name="strNoChg">Playlist unchanged, nothing to save</string>
+<string name="strPlaylistName">Playlist name:</string>
+<string name="strPlaylistPath">Playlist path:</string>
+<string name="strIOError">I/O error!</string>
+<string name="strInternalError">Internal error!</string>
+<string name="strAddPlist">Add to Playlist</string>
+<string name="strAdd">Add</string>
+<string name="strMoveToTop">To top</string>
+<string name="strMoveToBottom">To bottom</string>
+<string name="strRecursive">Recursive</string>
+<string name="strCantRemovePlist">Cannot remove old playlist</string>
+<string name="strSrvInitFail">Server failed to initialize. Exiting!</string>
+<string name="strMplayerError">Media player error </string>
+<string name="strDriverMode">Direct hardware access</string>
+<string name="strAbout">andLess Android player for lossless audio files built on Mar  1, 2010</string>
+<string name="strAbout1">About</string>
+</resources>

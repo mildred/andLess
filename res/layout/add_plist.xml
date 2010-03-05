@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_height="wrap_content" android:layout_width="fill_parent" 
+  android:orientation="vertical">
+
+<TextView android:id="@+id/TextView01" 
+android:layout_height="wrap_content" android:layout_width="fill_parent" android:textSize="24px" android:textStyle="bold" android:text="@string/strPlaylistName"></TextView>
+
+<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/EditPlaylistName"></EditText>
+
+<TextView android:id="@+id/TextView02"  
+android:layout_height="wrap_content" android:layout_width="fill_parent" android:textSize="24px" android:textStyle="bold" android:text="@string/strPlaylistPath"></TextView>
+
+<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/EditPlaylistPath"></EditText>
+
+
+<RelativeLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/RelativeLayout01">
+<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentRight="true" android:id="@+id/ButtonSave" android:text="@string/strAdd"></Button>
+<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/strCancel" 
+android:layout_toLeftOf="@id/ButtonSave" android:layout_alignTop="@id/ButtonSave" android:id="@+id/ButtonCancel"></Button>
+<CheckBox android:layout_alignTop="@id/ButtonSave" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/CheckRecursive" android:text="@string/strRecursive"></CheckBox>
+</RelativeLayout>
+</LinearLayout>

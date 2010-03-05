@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<LinearLayout 
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:id="@+id/LinearLayout01" 
+android:orientation="vertical"
+android:layout_width="fill_parent" 
+android:layout_height="fill_parent">
+
+<ProgressBar android:id="@+id/PBar" 
+style="?android:attr/progressBarStyleHorizontal"
+android:layout_width="fill_parent"
+android:layout_height="8px">
+</ProgressBar>
+
+<ListView 
+android:orientation="horizontal"
+android:layout_height="wrap_content" 
+android:layout_width="fill_parent"
+android:id="@+id/FileList" android:longClickable="false" android:layout_weight="345">
+</ListView>
+
+
+<LinearLayout 
+android:orientation="horizontal"
+android:id="@+id/LinearLayout05" 
+android:layout_height="wrap_content" 
+android:layout_width="fill_parent" 
+android:layout_weight="1"
+android:background="#cccccc">
+
+<Button android:layout_width="wrap_content" android:layout_height="fill_parent" 
+android:id="@+id/ButtonQuit" android:background="@drawable/btn_quit" android:layout_weight="20">
+</Button>
+
+<Button android:layout_width="wrap_content" 
+android:layout_height="wrap_content" 
+android:id="@+id/ButtonVMinus" android:background="@drawable/vol_minus" android:layout_weight="1">
+</Button>
+
+<Button 
+android:layout_width="wrap_content" 
+android:layout_height="wrap_content" 
+android:id="@+id/ButtonVPlus" android:background="@drawable/vol_plus" android:layout_weight="1">
+</Button>
+
+<Button android:layout_width="wrap_content" 
+android:layout_height="wrap_content" 
+android:id="@+id/ButtonPrev" android:background="@drawable/go_prev_32" android:layout_weight="1">
+</Button>
+
+<Button android:layout_width="wrap_content" 
+android:layout_height="wrap_content" 
+android:id="@+id/ButtonNext" android:background="@drawable/go_next_32" android:layout_weight="1">
+</Button>
+
+<Button android:layout_width="wrap_content" 
+android:layout_height="wrap_content" 
+android:id="@+id/ButtonPause" android:background="@drawable/img_pause" android:layout_weight="1">
+</Button>
+
+<Button 
+android:layout_width="wrap_content" 
+android:layout_height="wrap_content" 
+android:id="@+id/ButtonUp" android:background="@drawable/go_up_32" android:layout_weight="1">
+</Button>
+
+</LinearLayout>
+
+
+</LinearLayout>

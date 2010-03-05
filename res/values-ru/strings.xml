@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+<string name="noSdCard">SD-карта не найдена, выходим.</string>
+<string name="app_name">andLess</string>
+<string name="quitApp">Выход</string>
+<string name="exiting">Выходим!</string>
+<string name="strAll">Все</string>
+<string name="strUp">Вверх</string>
+<string name="strCantInit">Не могу.</string>
+<string name="strPause">Пауза</string>
+<string name="quitAppSrv">Остановить службу и выйти</string>
+<string name="strStopped">[Остановлено]</string>
+<string name="strPaused">[Пауза]</string>
+<string name="strPlaying">[Текущий трек]</string>
+<string name="strSettings">Настройки</string>
+<string name="strFont">Размер шрифта</string>
+<string name="strColor">Тема</string>
+<string name="strNormal">Темная тема</string>
+<string name="strInverse">Светлая тема</string>
+<string-array name="Errors">
+<item>Ошибка инициализации</item>
+<item>Недопустимый параметр</item>
+<item>Ошибка открытия файла</item>
+<item>Неверный или неподдерживаемый формат файла</item>
+<item>Ошибка опроса конфигурации аудио-драйвера</item>
+<item>Ошибка конфигурирования аудио-драйвера</item>
+<item>Недопустимый аудио буфер</item>
+<item>Ошибка аудио-драйвера</item>
+<item>Ошибка запуска воспроизведения</item>
+<item>Ошибка записи</item>
+<item>Ошибка чтения</item>
+<item>Ошибка декодера</item>
+<item>Неверный временной офсет</item>
+<item>Недостаточно памяти</item>
+<item>Ошибка инициализации</item>
+</string-array>
+<string name="strBlueTheme">Синяя тема</string>
+<string name="strUpLayout">Кнопки сверху</string>
+<string name="strDownLayout">Кнопки снизу</string>
+<string name="strLayout">Компоновка</string>
+<string name="strNoFiles">Там ничего интересного</string>
+
+<string name="strCantSetup">Ошибка конфигурации интерфейса</string>
+<string name="strBadPlist">Пустой или неподдерживаемый плейлист</string>
+<string name="strBadCue">Формат CUE файла неверный или неподдерживаемый</string>
+<string name="strShuffle">Перемешивать все плейлисты</string>
+<string name="strSrvFail">Сбой сервера!</string>
+<string name="strNoCueSrc">Ссылка на несуществующий исходный файл в CUE файле</string>
+<string name="strCueSrcExt">Ссылка на исходный файл с неподдерживаемым разрешением в CUE файле</string>
+<string name="strTurnOffShuffle">Чтобы редактировать плейлист, сначала отмените режим перемешивания треков в плейлистах!</string>
+<string name="strSave">Сохранить</string>
+<string name="strCancel">Отмена</string>
+<string name="strDown">Вниз</string>
+<string name="strDelete">Удалить</string>
+<string name="strCurRow">Строка = </string>
+<string name="strDeleted">Удалено</string>
+<string name="strNoChg">Плейлист не был изменен, сохранять нечего</string>
+<string name="strPlaylistName">Имя плейлиста:</string>
+<string name="strPlaylistPath">Путь к плейлисту:</string>
+<string name="strIOError">Ошибка В/В!</string>
+<string name="strInternalError">Внутренняя ошибка!</string>
+<string name="strAddPlist">Добавить к плейлисту</string>
+<string name="strAdd">Добавить</string>
+<string name="strMoveToTop">В начало</string>
+<string name="strMoveToBottom">В конец</string>
+<string name="strRecursive">Рекурсивно</string>
+<string name="strCantRemovePlist">Невозможно удалить старый плейлист</string>
+<string name="strSrvInitFail">Ошибка инициализации сервера. Выхожу!</string>
+<string name="strMplayerError">Ошибка медиа-плеера</string>
+<string name="strDriverMode">Прямой доступ к драйверу</string>
+<string name="strAbout">Android плеер andLess для звуковых файлов без потерь. Дата сборки Mar  1, 2010</string>
+<string name="strAbout1">О программе</string>
+</resources>

@@ -1,0 +1,29 @@
+To setup the JNI sources, you'll need to do the following:
+
+(1) Go to your NDK root directory
+
+(2) mkdir apps/lossless
+
+(3) Create the file "apps/lossless/Application.mk" containing two lines:
+
+APP_PROJECT_PATH := $(call my-dir)/project
+APP_MODULES      := ape flac wav wv mpc lossless
+
+(4) In apps/lossless, make a link called "project" pointing to the unzipped andLess directory (full path!).
+    (check that from NDK root you can open the file you're reading now as apps/lossless/project/jni/README)
+
+(5) Change the following line in build-binary.mk (NDK build file):
+
+diff -r android-ndk-1.6_r1.orig/build/core/build-binary.mk android-ndk-1.6_r1/build/core/build-binary.mk
+166c166
+< $(LOCAL_BUILT_MODULE): PRIVATE_STATIC_LIBRARIES := $(static_libraries)
+---
+> $(LOCAL_BUILT_MODULE): PRIVATE_WHOLE_STATIC_LIBRARIES := $(static_libraries)
+
+I don't know how to get around this NDK "feature" gracefully, but the app won't link otherwise. 
+If you do know, please inform me. 
+
+(6) Now you just go to the ndk root dir and "make APP=lossless" to get "liblossless.so" in its proper place, 
+so that it'll get added to the .apk when you build the java code.
+
+

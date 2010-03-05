@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<set xmlns:android="http://schemas.android.com/apk/res/android" android:shareInterpolator="false" android:fillAfter="true">
+ <alpha android:fillAfter="true" android:startOffset="0" android:fromAlpha="1.0" android:toAlpha="0.2" android:duration="100" />
+ <alpha android:fillAfter="true" android:startOffset="100" android:fromAlpha="0.2" android:toAlpha="255.0" android:duration="100" />
+</set>

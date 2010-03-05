@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/layout_root"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent" 
+  android:orientation="vertical">
+
+<TextView android:id="@+id/TextView01" android:layout_width="wrap_content" android:layout_height="wrap_content" 
+android:textSize="20px" android:text="@string/strLayout" android:textStyle="bold" android:paddingLeft="4px"></TextView>
+
+<RadioGroup android:layout_width="wrap_content" android:layout_height="wrap_content" 
+android:id="@+id/RadioLayout" android:orientation="horizontal">
+<RadioButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/strUpLayout" android:id="@+id/NormalLayout"></RadioButton>
+<RadioButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/DownLayout" android:text="@string/strDownLayout" android:paddingRight="4px"></RadioButton>
+</RadioGroup>
+
+<TextView android:id="@+id/TextView02" android:layout_width="wrap_content" android:layout_height="wrap_content" 
+android:textSize="20px" android:text="@string/strColor" android:textStyle="bold" android:paddingLeft="4px"></TextView>
+
+<RadioGroup android:layout_width="wrap_content" android:layout_height="wrap_content" 
+android:id="@+id/RadioTheme" android:orientation="horizontal">
+<RadioButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/strNormal" android:id="@+id/NormalColors" android:paddingRight="14px"></RadioButton>
+<RadioButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/strInverse" android:id="@+id/InverseColors"></RadioButton>
+</RadioGroup>
+
+<TextView android:id="@+id/TextView03" android:layout_width="wrap_content" android:layout_height="wrap_content" 
+android:textSize="20px" android:text="@string/strFont" android:textStyle="bold" android:paddingLeft="4px"></TextView>
+
+<RadioGroup android:layout_width="wrap_content" android:layout_height="wrap_content" 
+android:id="@+id/RadioFont" android:orientation="horizontal">
+<RadioButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="12pt" android:id="@+id/Font12"></RadioButton>
+<RadioButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="16pt" android:id="@+id/Font16"></RadioButton>
+<RadioButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="20pt" android:id="@+id/Font20"></RadioButton>
+<RadioButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="24pt" android:id="@+id/Font24" android:paddingRight="4px"></RadioButton>
+
+</RadioGroup>
+
+
+
+<CheckBox android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/strShuffle" android:id="@+id/CheckShuffle"></CheckBox>
+<CheckBox android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/CheckMode" android:text="@string/strDriverMode"></CheckBox>
+</LinearLayout>
