@@ -478,7 +478,6 @@ JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_flacPlay(JNIEnv *env, jobject 
         ctx->bps = fc->bps;
         ctx->written = 0;
 
-
 	pthread_mutex_lock(&ctx->mutex);
 	ctx->state = MSM_PLAYING;
 	ctx->track_time = fc->totalsamples / fc->samplerate;

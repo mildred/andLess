@@ -83,7 +83,8 @@ public class AndLess extends Activity implements Comparator<File> {
     	private void log_err(String msg) {
     		Log.e(getClass().getSimpleName(), msg);
     	}
-     	
+
+  		
     	// UI elements defined in layout xml file.
 		private Button buttUp, buttPause, buttPrev, buttNext, buttVMinus, buttVPlus, buttQuit;
     	private ListView fileList;
@@ -119,7 +120,9 @@ public class AndLess extends Activity implements Comparator<File> {
     		public void onServiceConnected(ComponentName cn,IBinder obj) {
     			srv = IAndLessSrv.Stub.asInterface(obj);
     			if(srv == null) {
-    				log_err("failed to get service interface"); return;
+    				log_err("failed to get service interface"); 
+    				errExit(R.string.strErrSrvIf);
+    				return;
     			}
     			try{
     			//	if(!srv.initialized()) {
@@ -157,8 +160,7 @@ public class AndLess extends Activity implements Comparator<File> {
     				}
     				srv.registerCallback(cBack);
     			} catch(RemoteException e) {log_msg("remote exception in onServiceConnected: " + e.toString()); }
-    			Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
-    		//	Process.setThreadPriority(-19	);
+    		//	Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
     		}
     		public void onServiceDisconnected(ComponentName cn) { 
     			srv = null;
@@ -231,9 +233,38 @@ public class AndLess extends Activity implements Comparator<File> {
     	//	 v.setBackgroundDrawable(getResources().getDrawable(R.drawable.green_go_prev_32));
     	//	 v.scheduleDrawable(v.getBackground(), new RestoreButton((Button) v,R.drawable.go_prev_32), SystemClock.uptimeMillis()+delay);
 */    	
+    	private boolean samsung = true; 
+    	
     	View.OnClickListener onButtPause = new OnClickListener() {
+    		private String now_playing = null;
     		public void onClick(View v) { 
-    			new SendSrvCmd().execute(SendSrvCmd.cmd_pause); 
+    			if(samsung) {
+        			try {
+  						if(srv == null) errExit(R.string.strErrSrvZero);
+        				if(srv.is_paused()) {
+  							if(srv.resume() && srv.is_running()) {
+    						now_playing = curWindowTitle;
+    						  if(now_playing == null) {
+    							now_playing = srv.get_cur_track_name();
+    							if(now_playing == null) {
+    								now_playing = srv.get_cur_track_source();
+    								if(now_playing == null) {
+    									int i = now_playing.lastIndexOf('/'); 
+    									if(i >= 0) now_playing = now_playing.substring(i+1);
+    								}
+    							}
+    						  }
+  							}  
+  	    					if(now_playing != null) getWindow().setTitle(now_playing);
+  	    					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.img_pause));
+  						} else if(srv.pause()) {
+  	    					getWindow().setTitle(getString(R.string.strPaused));
+  	    					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.img_play));
+  						}
+ 					} catch (RemoteException e) {
+						log_err("exception in button handler");
+					}
+    			} else new SendSrvCmd().execute(SendSrvCmd.cmd_pause); 
     		}
     	};	
     	
@@ -248,34 +279,68 @@ public class AndLess extends Activity implements Comparator<File> {
     	View.OnClickListener onButtPrev= new OnClickListener() {
     		public void onClick(View v) {
     			v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),  R.anim.blink));
-    			new SendSrvCmd().execute(SendSrvCmd.cmd_prev); 
+    			if(samsung) {
+        			try {
+        				if(srv == null) errExit(R.string.strErrSrvZero);
+        				srv.set_driver_mode(prefs.driver_mode);
+	    				srv.play_prev();
+					} catch (RemoteException e) {
+						log_err("exception in button handler");
+					}
+    			} else new SendSrvCmd().execute(SendSrvCmd.cmd_prev); 
     		}	
     	};
     	View.OnClickListener onButtNext = new OnClickListener() {
         	public void onClick(View v) { 
         		v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),  R.anim.blink));
-        		new SendSrvCmd().execute(SendSrvCmd.cmd_next); 
+        		if(samsung) {
+        			try {
+        				if(srv == null) errExit(R.string.strErrSrvZero);
+        				srv.set_driver_mode(prefs.driver_mode);
+	    				srv.play_next();
+					} catch (RemoteException e) {
+						log_err("exception in button handler");
+					}
+        		} else new SendSrvCmd().execute(SendSrvCmd.cmd_next); 
         	}	
         };
         View.OnClickListener onButtVPlus = new OnClickListener() {
         	public void onClick(View v) { 
         		v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),  R.anim.blink));
-        		new SendSrvCmd().execute(SendSrvCmd.cmd_vol_up); 
+        		if(samsung) {
+        			try {
+        				if(srv == null) errExit(R.string.strErrSrvZero);
+        				srv.inc_vol();
+					} catch (RemoteException e) {
+						log_err("exception in button handler");
+					}
+        			
+        		} else new SendSrvCmd().execute(SendSrvCmd.cmd_vol_up); 
         	}	
         };
         View.OnClickListener onButtVMinus = new OnClickListener() {
         	public void onClick(View v) { 
         		v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),  R.anim.blink));
-        		new SendSrvCmd().execute(SendSrvCmd.cmd_vol_down); 
+        		if(samsung) {
+        			try {
+        				if(srv == null) errExit(R.string.strErrSrvZero);
+        				srv.dec_vol();
+					} catch (RemoteException e) {
+						log_err("exception in button handler");
+					}
+        		} else new SendSrvCmd().execute(SendSrvCmd.cmd_vol_down); 
         	}	
         };
     	
         View.OnClickListener onButtQuit = new OnClickListener() {
     		public void onClick(View v) {
     			v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),  R.anim.blink));
+    			prefs.save();
     			try {
     				if(srv != null) srv.shutdown();	
-    			} catch (Exception e) {}
+    			} catch (Exception e) {
+    				log_err("exception in srv.shutdown()");
+    			}
     			
     			if(conn != null) {
             		log_msg("unbinding service");
@@ -286,7 +351,6 @@ public class AndLess extends Activity implements Comparator<File> {
                 intie.setClassName("net.avs234", "net.avs234.AndLessSrv");
                 if(!stopService(intie)) log_err("service not stopped");	
                 else log_msg("service stopped");
-	    		prefs.save();
                 finish();
 	    		android.os.Process.killProcess(android.os.Process.myPid());
     		}
@@ -643,7 +707,7 @@ public class AndLess extends Activity implements Comparator<File> {
         	  	if(cur_path != null) editor.putString("last_path", cur_path.toString());
         	  	if(plist_path != null) editor.putString("plist_path", plist_path);
         	  	if(plist_name != null) editor.putString("plist_name", plist_name);
-        	  	editor.commit();
+        	  	if(!editor.commit()) showMsg(getString(R.string.strErrPrefs));
         	}
         }
         

@@ -194,7 +194,7 @@ JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_mpcPlay(JNIEnv *env, jobject o
     ctx->samplerate = info.sample_freq;
     ctx->bps = 16;
     ctx->written = 0;
-
+	
     pthread_mutex_lock(&ctx->mutex);
     ctx->state = MSM_PLAYING;
     ctx->track_time = mpc_streaminfo_get_length_samples(&info)/info.sample_freq;	

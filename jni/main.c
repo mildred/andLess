@@ -188,37 +188,124 @@ JNIEXPORT jboolean JNICALL Java_net_avs234_AndLessSrv_audioSetVolume(JNIEnv *env
     return true;	
 }
 
+static JavaVM *gvm;
+static jobject giface; 
 
 void update_track_time(JNIEnv *env, jobject obj, int time) {
+//     jclass cls = (*env)->GetObjectClass(env, obj);
+
+#if 0
      jclass cls = (*env)->GetObjectClass(env, obj);
      jmethodID mid = (*env)->GetStaticMethodID(env, cls, "updateTrackLen", "(I)V");
      if (mid == NULL) {
-//	  __android_log_print(ANDROID_LOG_INFO,"liblossless","Cannot find java callback to update time");
+	  __android_log_print(ANDROID_LOG_ERROR,"liblossless","Cannot find java callback to update time");
          return; 
      }
-//     __android_log_print(ANDROID_LOG_INFO,"liblossless",
-//	"Updating track time in Java (env=%p obj=%p cls=%p mid=%p time=%d)",env,obj,cls,mid,time);
-     (*env)->CallStaticVoidMethod(env,cls,mid,time);
+    (*env)->CallStaticVoidMethod(env,cls,mid,time);
+#else
+     jclass cls;
+     jmethodID mid;
+     bool attached = false;
+     JNIEnv *envy;
+	if((*gvm)->GetEnv(gvm, (void **)&envy, JNI_VERSION_1_4) != JNI_OK) {
+            __android_log_print(ANDROID_LOG_ERROR,"liblossless","update_track_time: GetEnv FAILED");
+	     if((*gvm)->AttachCurrentThread(gvm, &envy, NULL) != JNI_OK) {
+            	__android_log_print(ANDROID_LOG_ERROR,"liblossless","AttachCurrentThread FAILED");
+		     return;
+	     }	
+	     attached = true;	
+	}
+	cls = (*envy)->GetObjectClass(envy,giface);
+	if(!cls) {
+          __android_log_print(ANDROID_LOG_ERROR,"liblossless","failed to get class iface");
+	  return;  	
+	}
+        mid = (*env)->GetStaticMethodID(envy, cls, "updateTrackLen", "(I)V");
+        if(mid == NULL) {
+	  __android_log_print(ANDROID_LOG_ERROR,"liblossless","Cannot find java callback to update time");
+         return; 
+        }
+	(*envy)->CallStaticVoidMethod(envy,cls,mid,time);
+	if(attached) (*gvm)->DetachCurrentThread(gvm);
+#endif
+}
+
+
+static const char *classPathName = "net/avs234/AndLessSrv";
+
+static JNINativeMethod methods[] = {
+ { "audioInit", "(II)I", (void *) Java_net_avs234_AndLessSrv_audioInit },
+ { "audioExit", "(I)Z", (void *) Java_net_avs234_AndLessSrv_audioExit },
+ { "audioStop", "(I)Z", (void *) Java_net_avs234_AndLessSrv_audioStop },
+ { "audioPause", "(I)Z", (void *) Java_net_avs234_AndLessSrv_audioPause },
+ { "audioResume", "(I)Z", (void *) Java_net_avs234_AndLessSrv_audioResume },
+ { "audioGetDuration", "(I)I", (void *) Java_net_avs234_AndLessSrv_audioGetDuration },
+ { "audioGetCurPosition", "(I)I", (void *) Java_net_avs234_AndLessSrv_audioGetCurPosition },
+ { "audioSetVolume", "(II)Z", (void *) Java_net_avs234_AndLessSrv_audioSetVolume },
+ { "flacPlay", "(ILjava/lang/String;I)I", (void *) Java_net_avs234_AndLessSrv_flacPlay },
+ { "apePlay", "(ILjava/lang/String;I)I", (void *) Java_net_avs234_AndLessSrv_apePlay },
+ { "wavPlay", "(ILjava/lang/String;I)I", (void *) Java_net_avs234_AndLessSrv_wavPlay },
+ { "wvPlay", "(ILjava/lang/String;I)I", (void *) Java_net_avs234_AndLessSrv_wvPlay },
+ { "mpcPlay", "(ILjava/lang/String;I)I", (void *) Java_net_avs234_AndLessSrv_mpcPlay },
+};
+
+
+jint JNI_OnLoad(JavaVM* vm, void* reserved) {
+
+    jclass clazz = NULL;
+    JNIEnv* env = NULL;
+    jmethodID constr = NULL;
+    jobject obj = NULL;
+
+      __android_log_print(ANDROID_LOG_INFO,"liblossless","JNI_OnLoad");
+      gvm = vm;	
+
+      if((*vm)->GetEnv(vm, (void **)&env, JNI_VERSION_1_4) != JNI_OK) {
+        __android_log_print(ANDROID_LOG_ERROR,"liblossless","GetEnv FAILED");
+        return -1;
+      }
+
+      clazz = (*env)->FindClass(env,classPathName);
+      if(!clazz) {
+        __android_log_print(ANDROID_LOG_ERROR,"liblossless","Registration unable to find class '%s'", classPathName);
+        return -1;
+      }
+      constr = (*env)->GetMethodID(env, clazz, "<init>", "()V");
+      if(!constr) {
+        __android_log_print(ANDROID_LOG_ERROR,"liblossless","Failed to get constructor");
+	return -1;
+      }
+      obj = (*env)->NewObject(env, clazz, constr);
+      if(!obj) {
+        __android_log_print(ANDROID_LOG_ERROR,"liblossless","Failed to create an interface object");
+	return -1;
+      }
+      giface = (*env)->NewGlobalRef(env,obj);
+
+      if((*env)->RegisterNatives(env, clazz, methods, sizeof(methods) / sizeof(methods[0])) < 0) {
+        __android_log_print(ANDROID_LOG_ERROR,"liblossless","Registration failed for '%s'", classPathName);
+        return -1;
+      }
+    
+   return JNI_VERSION_1_4;
 }
 
 
 
-/*
-JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_setAfd(JNIEnv *env, jobject obj, msm_ctx *ctx, jobject fdobj) {
-  jfieldID field = 0;
-  jclass class_fdesc = 0;
 
-    if(!ctx || ctx->afd < 0) return LIBLOSSLESS_ERR_NOCTX;	
-    class_fdesc = (*env)->GetObjectClass(env, fdobj);
-    if(!class_fdesc) return LIBLOSSLESS_ERR_NOCTX;	
-    field = (*env)->GetFieldID(env, class_fdesc, "descriptor", "I");
-    if(!field) return LIBLOSSLESS_ERR_NOCTX;
-    (*env)->SetIntField(env, fdobj, field, ctx->afd);
-    field = (*env)->GetFieldID(env, class_fdesc, "readOnly", "B");
-    if(!field) return LIBLOSSLESS_ERR_NOCTX;
-    (*env)->SetBooleanField(env, fdobj, field, true);
 
-  return 0;
-}
-*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

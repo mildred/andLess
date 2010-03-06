@@ -118,7 +118,7 @@ JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_wavPlay(JNIEnv *env, jobject o
 	        close(ctx->fd);
 	        return i;
 	}
-	buff = (char *) malloc(ctx->conf_size);
+	buff = (unsigned char *) malloc(ctx->conf_size);
 	if(!buff) {
 		close(ctx->fd);
 		return LIBLOSSLESS_ERR_NOMEM;

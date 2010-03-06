@@ -33,21 +33,21 @@ public class AndLessSrv extends Service {
 		System.loadLibrary("lossless");
 	}
 	
-	public native int 		audioInit(int ctx, int mode);	
-	public native boolean	audioExit(int ctx);
-	public native boolean	audioStop(int ctx);
-	public native boolean	audioPause(int ctx);
-	public native boolean	audioResume(int ctx);
+	public static native int 		audioInit(int ctx, int mode);	
+	public static native boolean	audioExit(int ctx);
+	public static native boolean	audioStop(int ctx);
+	public static native boolean	audioPause(int ctx);
+	public static native boolean	audioResume(int ctx);
 	
-	public native int		audioGetDuration(int ctx);
-	public native int		audioGetCurPosition(int ctx);
-	public native boolean	audioSetVolume(int ctx, int vol);
+	public static native int		audioGetDuration(int ctx);
+	public static native int		audioGetCurPosition(int ctx);
+	public static native boolean	audioSetVolume(int ctx, int vol);
 	
-	public native int		flacPlay(int ctx,String file, int start);
-	public native int		apePlay(int ctx,String file, int start);
-	public native int		wavPlay(int ctx,String file, int start);
-	public native int		wvPlay(int ctx,String file, int start);
-	public native int		mpcPlay(int ctx,String file, int start);
+	public static native int		flacPlay(int ctx,String file, int start);
+	public static native int		apePlay(int ctx,String file, int start);
+	public static native int		wavPlay(int ctx,String file, int start);
+	public static native int		wvPlay(int ctx,String file, int start);
+	public static native int		mpcPlay(int ctx,String file, int start);
 	
 	// errors returned by xxxPlay functions
 	public static final int LIBLOSSLESS_ERR_NOCTX = 1;
@@ -93,7 +93,7 @@ public class AndLessSrv extends Service {
 	public static int curTrackStart = 0;
 	private static int last_cue_start = 0;
 	private static int total_cue_len = 0;
-	
+		
 	// Callback to be called from native code
 	
 	public static void updateTrackLen(int time) {
@@ -176,7 +176,10 @@ public class AndLessSrv extends Service {
        	 	return LIBLOSSLESS_ERR_INV_PARM;
 		} finally  {
 			synchronized(mplayer_lock) {
-				if(mplayer != null) mplayer.release();
+				if(mplayer != null) {
+					if(mplayer.isPlaying()) mplayer.stop();
+					mplayer.release();
+				}
 				mplayer = null;
 			}
 		}
@@ -214,6 +217,10 @@ public class AndLessSrv extends Service {
 		private CueUpdater	cup;		// updater for cue playlists
 		private int			cur_mode;		// MODE_NONE for mp3, or one of driver_mode
 		private int			driver_mode;	// driver mode in client preferences
+		
+		private String		last_file;
+		private int			last_fpos;
+		private int			last_stop_time;
 		
 		playlist() {
 			dir = null;  	files = null;
@@ -375,7 +382,8 @@ public class AndLessSrv extends Service {
 						} else {
 							String curfile = files[cur_pos];
 							int start = curfile.lastIndexOf("/") + 1; 
-							String cf = curfile.substring(start);
+							int end = curfile.lastIndexOf(".");
+							String cf = end > start ? curfile.substring(start,end) : curfile.substring(start);
 							informTrack(cf,false);
 						}
 	              		if(files[cur_pos].endsWith(".ape") || files[cur_pos].endsWith(".APE")) {
