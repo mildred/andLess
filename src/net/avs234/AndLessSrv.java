@@ -114,7 +114,7 @@ public class AndLessSrv extends Service {
 	         try { 
 	            	if(!error) {
 	            		cBacks.getBroadcastItem(i).playItemChanged(false,s);
-						AndLessSrv.this.notify(R.drawable.icon/*R.drawable.playbackstart*/,s);
+						AndLessSrv.this.notify(R.drawable.new_icon/*R.drawable.playbackstart*/,s);
 	            	} else {
 	            		cBacks.getBroadcastItem(i).playItemChanged(true,getString(R.string.strStopped));
 	            		if(s.compareTo(getString(R.string.strStopped))!= 0) cBacks.getBroadcastItem(i).errorReported(s);
@@ -130,18 +130,22 @@ public class AndLessSrv extends Service {
 	
 	private MediaPlayer mplayer = null;
 	private Object mplayer_lock= new Object();
-	
-	public int extPlay(String file) {
+	private int fck_start;
+	public int extPlay(String file, int start) {
 		try {
 			
 			mplayer = new MediaPlayer();
+			fck_start = start;
 			if(mplayer == null) return LIBLOSSLESS_ERR_NOCTX;
 
 			mplayer.setDataSource(file);
+/*			
 			mplayer.prepare();
-		
+			
+			if(start != 0) mplayer.seekTo(start*1000);
 			curTrackLen = mplayer.getDuration()/1000;
 			mplayer.start();
+*/			
 
 			mplayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
 				public boolean onError(MediaPlayer mp, int what, int extra) {
@@ -162,6 +166,19 @@ public class AndLessSrv extends Service {
 					}
 				}
 			});
+
+			//////////////
+			mplayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+				public void onPrepared(MediaPlayer mp) {
+					if(fck_start != 0) mplayer.seekTo(fck_start*1000);
+					curTrackLen = mplayer.getDuration()/1000;
+				}
+			});
+			mplayer.prepare();
+			SystemClock.sleep(250);
+			mplayer.start();
+			//////////////
+			
 			if(!mplayer.isPlaying()) return LIBLOSSLESS_ERR_INV_PARM;
 
 			if(curTrackLen <= 0) {	// WTF???
@@ -211,16 +228,13 @@ public class AndLessSrv extends Service {
 		private String[]	names;		// track names from cue files 
 		private int[]		times; 		// track start times from cue files
 		private	int 		cur_pos;	// current track
+		private int			cur_start;	// start seconds the file must be played
 		private PlayThread 	th;			// main thread
-		private boolean		running;
+		private boolean		running;	// either playing or paused
 		private boolean		paused;
 		private CueUpdater	cup;		// updater for cue playlists
 		private int			cur_mode;		// MODE_NONE for mp3, or one of driver_mode
 		private int			driver_mode;	// driver mode in client preferences
-		
-		private String		last_file;
-		private int			last_fpos;
-		private int			last_stop_time;
 		
 		playlist() {
 			dir = null;  	files = null;
@@ -263,7 +277,7 @@ public class AndLessSrv extends Service {
 		private class CueUpdater {
 			private class CUETimerTask extends TimerTask {
 				public void run() {
-					cur_pos++;
+					cur_pos++; cur_start = 0;
 					if(cur_pos < names.length && names[cur_pos] != null) {
 						log_msg("track name = " + names[cur_pos]);
 						if(cur_pos + 1 < files.length) curTrackLen = times[cur_pos+1] - times[cur_pos];
@@ -338,7 +352,7 @@ public class AndLessSrv extends Service {
 				if(mplayer != null) return mplayer.getCurrentPosition()/1000;
 			} 
 			if(ctx == 0) return 0;
-			return audioGetCurPosition(ctx);
+			return audioGetCurPosition(ctx) + cur_start;
 		}
 	
 		private int getDuration() {
@@ -367,6 +381,7 @@ public class AndLessSrv extends Service {
 						curTrackStart = 0;
 						last_cue_start = 0;
 						total_cue_len = 0;
+						
 						if(names[cur_pos] != null) {	// this is CUE track
 							log_msg("track name = " + names[cur_pos]);
 							if(cur_pos + 1 < files.length) {
@@ -374,36 +389,38 @@ public class AndLessSrv extends Service {
 								curTrackLen = times[cur_pos+1]-times[cur_pos]; // native thread won't update this track length but will save total_cue_len  
 								last_cue_start = -1;						   // so that we'll be able to update the last track length in due time from CueUpdater 
 								cup = new CueUpdater();
-								cup.schedule((times[cur_pos+1] - times[cur_pos])*1000);
+								cup.schedule((times[cur_pos+1] - times[cur_pos])*1000 - cur_start);
 							} else {	// last CUE track				
 								informTrack(names[cur_pos],false);	
 								last_cue_start = times[cur_pos]; // native thread will subtract this from the total cue length 
 							}
 						} else {
-							String curfile = files[cur_pos];
-							int start = curfile.lastIndexOf("/") + 1; 
-							int end = curfile.lastIndexOf(".");
-							String cf = end > start ? curfile.substring(start,end) : curfile.substring(start);
+							String cur_file = files[cur_pos];
+							int start = cur_file.lastIndexOf("/") + 1; 
+							int end = cur_file.lastIndexOf(".");
+							String cf = end > start ? cur_file.substring(start,end) : cur_file.substring(start);
 							informTrack(cf,false);
 						}
 	              		if(files[cur_pos].endsWith(".ape") || files[cur_pos].endsWith(".APE")) {
-	              			if(initAudioMode(driver_mode))	k = apePlay(ctx,files[cur_pos],times[cur_pos]);
+	              			if(initAudioMode(driver_mode))	k = apePlay(ctx,files[cur_pos],times[cur_pos]+cur_start);
 	              		} else if(files[cur_pos].endsWith(".flac") || files[cur_pos].endsWith(".FLAC")) {
-	              			if(initAudioMode(driver_mode)) k = flacPlay(ctx,files[cur_pos],times[cur_pos]);
+	              			if(initAudioMode(driver_mode)) k = flacPlay(ctx,files[cur_pos],times[cur_pos]+cur_start);
 						} else if(files[cur_pos].endsWith(".wav") || files[cur_pos].endsWith(".WAV")) {
-							if(initAudioMode(driver_mode)) k = wavPlay(ctx,files[cur_pos],times[cur_pos]);
+							if(initAudioMode(driver_mode)) k = wavPlay(ctx,files[cur_pos],times[cur_pos]+cur_start);
 						} else if(files[cur_pos].endsWith(".wv") || files[cur_pos].endsWith(".WV")) {
-							if(initAudioMode(driver_mode)) k = wvPlay(ctx,files[cur_pos],times[cur_pos]);
+							if(initAudioMode(driver_mode)) k = wvPlay(ctx,files[cur_pos],times[cur_pos]+cur_start);
 						} else if(files[cur_pos].endsWith(".mpc") || files[cur_pos].endsWith(".MPC")) {
-							if(initAudioMode(driver_mode)) k = mpcPlay(ctx,files[cur_pos],times[cur_pos]);
+							if(initAudioMode(driver_mode)) k = mpcPlay(ctx,files[cur_pos],times[cur_pos]+cur_start);
 						} else {
-							if(initAudioMode(MODE_NONE)) k = extPlay(files[cur_pos]);
+							if(initAudioMode(MODE_NONE)) k = extPlay(files[cur_pos],cur_start);
 						}
 	              		nm.cancel(NOTIFY_ID);
 					} catch(Exception e) { 
 						log_err("run(): exception in xxxPlay(): " + e.toString());
+						cur_start = 0;
 						continue;
 					}
+					cur_start = 0;
 					if(k == 0) log_msg(Process.myTid() + ": xxxPlay() returned normally");
 					else {
 						log_err(String.format("run(): xxxPlay() returned error %d",k));
@@ -475,11 +492,11 @@ public class AndLessSrv extends Service {
 			} else log_msg(String.format("stop(): player thread was null (my tid %d)", Process.myTid()));
 			return true;
 		}
-		public boolean play(int n) {
+		public boolean play(int n, int start) {
 			log_msg(String.format("play(%d)",n));
 			stop();
 			if(n >= files.length || n < 0) return false;
-			cur_pos= n;
+			cur_pos= n; cur_start = start;
 			th = new PlayThread();
 			log_msg(String.format("play(): created new thread from %d", Process.myTid()));
 			th.start();
@@ -487,11 +504,11 @@ public class AndLessSrv extends Service {
 		}
 		public boolean play_next() {
 			log_msg("play_next()");
-			return play(cur_pos+1);
+			return play(cur_pos+1,0);
 		}
 		public boolean play_prev() {
 			log_msg("play_prev()");
-			return play(cur_pos-1);
+			return play(cur_pos-1,0);
 		}
 		public boolean pause() {
 			log_msg("pause()");
@@ -576,7 +593,7 @@ public class AndLessSrv extends Service {
 			plist = new playlist(); return plist.init_playlist(path,nitems); 
 		}
 		public boolean  add_to_playlist(String src, String name, int start_time, int pos) { return plist.add_to_playlist(src,name,start_time,pos);}
-		public boolean	play (int n) 	{ return (plist == null) ? false : plist.play(n); }
+		public boolean	play (int n, int start) 	{ return (plist == null) ? false : plist.play(n,start); }
 		public boolean	play_next()  	{ return (plist == null) ? false : plist.play_next(); }
 		public boolean	play_prev()  	{ return (plist == null) ? false : plist.play_prev(); }
 		public boolean	pause() 		{ return (plist == null) ? false : plist.pause(); }

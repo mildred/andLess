@@ -84,7 +84,7 @@ int audio_start(msm_ctx *ctx, int channels, int samplerate) {
 
 void audio_stop(msm_ctx *ctx) {
 	
-    if(!ctx) return;
+    if(!ctx || ctx->state == MSM_STOPPED) return;
     if(ctx->state != MSM_PAUSED) pthread_mutex_lock(&ctx->mutex);
     if(ctx->fd >= 0) {
 	close(ctx->fd); ctx->fd = -1;
@@ -140,7 +140,8 @@ JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_audioGetDuration(JNIEnv *env, 
 }
 
 JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_audioGetCurPosition(JNIEnv *env, jobject obj, msm_ctx *ctx) {
-   if(!ctx || ctx->state != MSM_PLAYING || !ctx->channels || !ctx->samplerate || !ctx->bps) return 0;
+   if(!ctx || (ctx->state != MSM_PLAYING && ctx->state != MSM_PAUSED) 
+		|| !ctx->channels || !ctx->samplerate || !ctx->bps) return 0;
    return ctx->written/(ctx->channels * ctx->samplerate * (ctx->bps/8));
 }
 

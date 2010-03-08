@@ -23,14 +23,14 @@ int libmedia_start(msm_ctx *ctx, int channels, int samplerate) {
 
    if(!ctx) return LIBLOSSLESS_ERR_NOCTX;
 
-//  __android_log_print(ANDROID_LOG_INFO,"liblossless","libmedia_start chans=%d rate=%d afd=%d atrack=%p",
-//                channels, samplerate,ctx->afd,ctx->track);
+  __android_log_print(ANDROID_LOG_INFO,"liblossless","libmedia_start chans=%d rate=%d afd=%d atrack=%p",
+                channels, samplerate,ctx->afd,ctx->track);
 
    if(ctx->track) delete (AudioTrack *) ctx->track;
    ctx->track = 0;	
    AudioTrack* atrack = new AudioTrack();
 
-//  __android_log_print(ANDROID_LOG_INFO,"liblossless","AudioTrack created at %p. Now trying to setup", atrack);
+  __android_log_print(ANDROID_LOG_INFO,"liblossless","AudioTrack created at %p. Now trying to setup", atrack);
 
    if(!atrack) return LIBLOSSLESS_ERR_INIT;
    ctx->track = atrack; 	
@@ -38,7 +38,7 @@ int libmedia_start(msm_ctx *ctx, int channels, int samplerate) {
 	 AudioSystem::PCM_16_BIT, channels, DEFAULT_CONF_BUFSZ/(2*channels));
    if(status != NO_ERROR) { 
 
-//  __android_log_print(ANDROID_LOG_INFO,"liblossless","AudioTrack->set failed, error code=%d!", status);
+  __android_log_print(ANDROID_LOG_INFO,"liblossless","AudioTrack->set failed, error code=%d!", status);
   __android_log_print(ANDROID_LOG_INFO,"liblossless","Well... trying new Android AudioSystem interface then");
 	int chans = (channels == 2) ? 12 : 4;
 	status = atrack->set(AudioSystem::MUSIC, samplerate, AudioSystem::PCM_16_BIT, chans, 
@@ -49,18 +49,23 @@ int libmedia_start(msm_ctx *ctx, int channels, int samplerate) {
 		return LIBLOSSLESS_ERR_INIT;  
 	   }		
   }
-//  __android_log_print(ANDROID_LOG_INFO,"liblossless","AudioTrack setup OK, starting audio!");
+  __android_log_print(ANDROID_LOG_INFO,"liblossless","AudioTrack setup OK, starting audio!");
    ctx->conf_size = DEFAULT_CONF_BUFSZ; 	
    atrack->start();	
-//  __android_log_print(ANDROID_LOG_INFO,"liblossless","playback started!");
+  __android_log_print(ANDROID_LOG_INFO,"liblossless","playback started!");
    return 0; 
 }
 
 void libmedia_stop(msm_ctx *ctx) {
+  __android_log_print(ANDROID_LOG_INFO,"liblossless","libmetia_stop called, ctx=%p, track=%p", ctx, 
+		ctx ? ctx->track : 0);
   if(ctx && ctx->track) {
 	((AudioTrack *) ctx->track)->stop();
+  __android_log_print(ANDROID_LOG_INFO,"liblossless","libmetia_stop: audio track stopped!");
 	((AudioTrack *) ctx->track)->flush();
-	delete (AudioTrack *) ctx->track;	
+  __android_log_print(ANDROID_LOG_INFO,"liblossless","libmetia_stop: audio track flushed!");
+//	delete (AudioTrack *) ctx->track;	
+  __android_log_print(ANDROID_LOG_INFO,"liblossless","libmetia_stop: audio track deleted!");
 	ctx->track = 0;	
 	ctx->track_time = 0;
 	ctx->state = (msm_ctx::_msm_state_t) 0;

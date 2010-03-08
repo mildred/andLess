@@ -78,7 +78,7 @@ static bool flac_init(int fd, FLACContext* fc, int start, flac_seek_t *lo, flac_
     uint32_t offset_lo,offset_hi;
     int n;
     bool seeks_found;
-    uint32_t target_sample = 0;
+    uint32_t target_sample;
 
 
     if (lseek(fd, 0, SEEK_SET) < 0) 
@@ -88,13 +88,36 @@ static bool flac_init(int fd, FLACContext* fc, int start, flac_seek_t *lo, flac_
 
     if (read(fd, buf, 4) < 4)
     {
-        return false;
+    	 return false;
     }
 
     if (memcmp(buf,"fLaC",4) != 0) 
     {
-        return false;
+   
+	if(memcmp(buf, "ID3",3) !=0) return false;
+	if (read(fd, buf, 6) < 6)
+    	{
+         return false;
+    	}
+	target_sample = buf[2] << 21;
+	target_sample += buf[3] << 14;
+	target_sample += buf[4] << 7;
+	target_sample += buf[5];
+	target_sample += 10;
+	if (lseek(fd, target_sample, SEEK_SET) < 0)
+	{
+          return false;
+	}
+	
+	if (read(fd, buf, 4) < 4)
+	{
+         return false;
+	}
+
+	if (memcmp(buf,"fLaC",4) != 0) return false;
     }
+    target_sample = 0;
+
     fc->metadatalength = 4;
 
     seeks_found = start ? false : true;
@@ -498,6 +521,7 @@ JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_flacPlay(JNIEnv *env, jobject 
                     pthread_mutex_unlock(&ctx->mutex);
                 }
                 if(ctx->fd == -1) return 0; // we were stopped from the main thread
+		if(ctx->written/(ctx->channels * ctx->samplerate * (ctx->bps/8))+2 > ctx->track_time) break;
                 close(ctx->fd); ctx->fd = -1;
 		return LIBLOSSLESS_ERR_DECODE;
 	}
