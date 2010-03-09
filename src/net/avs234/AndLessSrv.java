@@ -215,12 +215,11 @@ public class AndLessSrv extends Service {
 					PendingIntent.getActivity(this, 0, new Intent(this,AndLess.class), 0));
 		nm.notify(NOTIFY_ID,notty);
 	}
-
 	
 	////////////////////////////////////////////////////////////////
 	//////////////////////// Main class ////////////////////////////
 	////////////////////////////////////////////////////////////////
-	
+		
 	private class playlist {
 			
 		private String 	 	dir;		// source file(s) path
@@ -272,7 +271,7 @@ public class AndLessSrv extends Service {
 			}
 			return true;
 		}
-
+		
 		// Used for cue files to update current track number and name.
 		private class CueUpdater {
 			private class CUETimerTask extends TimerTask {

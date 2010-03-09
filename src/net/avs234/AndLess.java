@@ -23,6 +23,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -450,7 +451,7 @@ public class AndLess extends Activity implements Comparator<File> {
     					srv.get_cur_seconds() - srv.get_cur_track_start(), srv.get_cur_pos());   
     			writer.write(g);
    			   	writer.close();
-   			   	log_msg("saving bookie: " + book_file.toString() + ": " + g);
+   			   	log_msg("SAVING BOOK: " + book_file.toString() + ": " + g);
     		} catch (Exception e) { 
 				log_err("exception in saveBook: " + e.toString()); 
 			}
@@ -471,6 +472,7 @@ public class AndLess extends Activity implements Comparator<File> {
 				if(f.exists()) {
 					if(f.toString().endsWith(bmark_ext)) {
 			    		try {
+			    			if(srv.is_running()) saveBook();
 			    			BufferedReader reader = new BufferedReader(new FileReader(f), 8192);
 			    			String line = reader.readLine();
 			    			reader.close();
@@ -485,10 +487,9 @@ public class AndLess extends Activity implements Comparator<File> {
 	    	        		int seconds = (Integer.valueOf(line.substring(start, end))).intValue();
 	    	        		int track = 0;
 	    					String cc = srv.get_cur_dir();
-	    	        		
-	    					log_err("BOOK: " + fname + " @" + seconds + " cc=" + cc + " cp=" + cur_path.toString());
-	    	        		
+	    	        			    					   	        		
 	    	        		if(hasAudioExt(ff)) {
+	    	        			log_msg("BOOK: " + fname + " @" + seconds + " cc=" + cc + " cp=" + cur_path.toString());
 	    	        			for(start = first_file_pos; start < files.size(); start++) {
 	    							if(files.get(start).compareTo(fname)==0) break;	
 	    						}
@@ -503,11 +504,12 @@ public class AndLess extends Activity implements Comparator<File> {
 	        					}	    	        			
 	    	        		} else if(hasPlistExt(ff) || hasCueExt(ff)) {
 	    	        			track = (Integer.valueOf(line.substring(end+1))).intValue();
+	    	        			log_msg("BOOK: " + fname + " ["+ track +"] @" + seconds + " cc=" + cc + " cp=" + cur_path.toString());
 	    	        			if(!setAdapter(ff)) {
 	        						log_err("error setting adapter for " + f.toString());
 	        						return;
 	        					}
-	        					if(cc == null) {
+	        					if(cc == null || cur_path.toString().compareTo(cc) != 0 || playlist_changed) {
 	        						if(hasCueExt(ff)) 
 	        							playContents(ff.toString(),files,track_names,start_times,track - first_file_pos,seconds);
 	        						else if(hasPlistExt(ff)) 
@@ -766,6 +768,7 @@ public class AndLess extends Activity implements Comparator<File> {
             
             if(!bindService(intie, conn,0)) log_err("cannot bind service");
             else log_msg("service bound");
+            
     	}
 
     	@Override
@@ -1317,9 +1320,9 @@ public class AndLess extends Activity implements Comparator<File> {
 				switch(filetype(filez[i])) {
 					case 0:	
 						dirs++; break;
+					case 1:
 					case 2: case 3:		
 						cues++; break;
-					case 1:	
 					case 9:	case 4: case 5:	
 					case 6: case 7: case 8:	
 						flacs++; break;
