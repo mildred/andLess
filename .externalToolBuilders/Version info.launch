@@ -3,6 +3,6 @@
 <booleanAttribute key="org.eclipse.debug.ui.ATTR_LAUNCH_IN_BACKGROUND" value="false"/>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="/usr/bin/perl"/>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_RUN_BUILD_KINDS" value="full,incremental,"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-i /home/subbotin/andLess/settime.pl /home/subbotin/andLess/res/values-ru/strings.xml /home/subbotin/andLess/res/values/strings.xml"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-i /home/avs234/andLess/settime.pl /home/avs234/andLess/res/values-ru/strings.xml /home/avs234/andLess/res/values/strings.xml"/>
 <booleanAttribute key="org.eclipse.ui.externaltools.ATTR_TRIGGERS_CONFIGURED" value="true"/>
 </launchConfiguration>

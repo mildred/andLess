@@ -43,6 +43,7 @@ extern JNIEXPORT jboolean JNICALL Java_net_avs234_AndLessSrv_audioSetVolume(JNIE
 extern JNIEXPORT jboolean JNICALL Java_net_avs234_AndLessSrv_audioStop(JNIEnv *env, jobject obj, msm_ctx *ctx);
 
 extern JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_wavPlay(JNIEnv *env, jobject obj, msm_ctx* ctx, jstring jfile, jint start);
+extern JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_alacPlay(JNIEnv *env, jobject obj, msm_ctx* ctx, jstring jfile, jint start);
 extern JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_flacPlay(JNIEnv *env, jobject obj, msm_ctx* ctx, jstring jfile, jint start);
 extern JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_apePlay(JNIEnv *env, jobject obj, msm_ctx* ctx, jstring jfile, jint start);
 extern JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_wvPlay(JNIEnv *env, jobject obj, msm_ctx* ctx, jstring jfile, jint start);

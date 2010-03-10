@@ -54,7 +54,6 @@ import android.widget.RadioGroup.OnCheckedChangeListener;
 import net.avs234.iconifiedlist.IconifiedText;
 import net.avs234.iconifiedlist.IconifiedTextListAdapter;
 
-
 public class AndLess extends Activity implements Comparator<File> {
 	
     	// Current directory **OR** current cue/playlist file
@@ -254,7 +253,7 @@ public class AndLess extends Activity implements Comparator<File> {
     	//	 v.setBackgroundDrawable(getResources().getDrawable(R.drawable.green_go_prev_32));
     	//	 v.scheduleDrawable(v.getBackground(), new RestoreButton((Button) v,R.drawable.go_prev_32), SystemClock.uptimeMillis()+delay);
 */    	
-    	private boolean samsung = true; 
+    	private boolean samsung = false; 
     	
     	View.OnClickListener onButtPause = new OnClickListener() {
     		private String now_playing = null;
@@ -768,7 +767,7 @@ public class AndLess extends Activity implements Comparator<File> {
             
             if(!bindService(intie, conn,0)) log_err("cannot bind service");
             else log_msg("service bound");
-            
+            if((new Build()).DEVICE.compareTo("GT-I5700") == 0 && (new Build.VERSION()).SDK.compareTo("7") == 0) samsung = true;
     	}
 
     	@Override
@@ -1196,7 +1195,7 @@ public class AndLess extends Activity implements Comparator<File> {
     				}
     			).show();
     	}
-    	    	
+        	
     	public void errExit(int resource) {	errExit(getString(resource)); }
     	
        	////////////////////////////////////////////////////////////////////
@@ -1217,8 +1216,8 @@ public class AndLess extends Activity implements Comparator<File> {
     	public static final String bmark_ext = ".bmark";
     	
    	// Mp3support
-    	public static final String[] audioExts = { ".flac", ".FLAC", ".ape", ".APE", ".wv", ".WV", ".mpc", ".MPC", ".wav", ".WAV", 
-    		".mp3", ".MP3", ".wma", ".WMA", ".ogg", ".OGG", ".3gpp", ".3GPP", ".aac", ".AAC", "m4a", "M4A" };
+    	public static final String[] audioExts = { ".flac", ".FLAC", ".ape", ".APE", ".wv", ".WV", ".mpc", ".MPC", "m4a", "M4A",
+    		".wav", ".WAV", ".mp3", ".MP3", ".wma", ".WMA", ".ogg", ".OGG", ".3gpp", ".3GPP", ".aac", ".AAC" };
     	public static final String[] plistExts = { plist_ext, ".m3u", ".M3U", ".pls", ".PLS" };
     	
     	
@@ -1259,13 +1258,14 @@ public class AndLess extends Activity implements Comparator<File> {
     		else if(s.endsWith(".wav") || s.endsWith(".WAV")) return 7;
     		else if(s.endsWith(".wv") || s.endsWith(".WV")) return 8;
     		else if(s.endsWith(".mpc") || s.endsWith(".MPC")) return 6;
-// Mp3support
-    		else if(s.endsWith(".mp3") || s.endsWith(".MP3")) return 9;
-    		else if(s.endsWith(".wma") || s.endsWith(".WMA")) return 9;
-    		else if(s.endsWith(".ogg") || s.endsWith(".OGG")) return 9;
-    		else if(s.endsWith(".3gpp") || s.endsWith(".3GPP")) return 9;
-    		else if(s.endsWith(".aac") || s.endsWith(".AAC")) return 9;
     		else if(s.endsWith(".m4a") || s.endsWith(".M4A")) return 9;
+ 		// Mp3support
+    		else if(s.endsWith(".mp3") || s.endsWith(".MP3")) return 10;
+    		else if(s.endsWith(".wma") || s.endsWith(".WMA")) return 10;
+    		else if(s.endsWith(".ogg") || s.endsWith(".OGG")) return 10;
+    		else if(s.endsWith(".3gpp") || s.endsWith(".3GPP")) return 10;
+    		else if(s.endsWith(".aac") || s.endsWith(".AAC")) return 10;
+    	
     		return 666;
     	}
     	
@@ -1320,11 +1320,13 @@ public class AndLess extends Activity implements Comparator<File> {
 				switch(filetype(filez[i])) {
 					case 0:	
 						dirs++; break;
-					case 1:
-					case 2: case 3:		
+					case 1:	case 2:
+					case 3:		
 						cues++; break;
-					case 9:	case 4: case 5:	
-					case 6: case 7: case 8:	
+					case 4: case 5: 
+					case 6: case 7: 
+					case 8:	case 9:	
+					case 10:	
 						flacs++; break;
 					default: break;
 				}

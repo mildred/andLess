@@ -43,6 +43,7 @@ public class AndLessSrv extends Service {
 	public static native int		audioGetCurPosition(int ctx);
 	public static native boolean	audioSetVolume(int ctx, int vol);
 	
+	public static native int		alacPlay(int ctx,String file, int start);
 	public static native int		flacPlay(int ctx,String file, int start);
 	public static native int		apePlay(int ctx,String file, int start);
 	public static native int		wavPlay(int ctx,String file, int start);
@@ -316,7 +317,7 @@ public class AndLessSrv extends Service {
 				timer.schedule(timer_task, last_time_left);
 			}
 		}
-		
+				
 		private boolean permsOkay = false;
 		
 		private boolean initAudioMode(int mode) {
@@ -404,7 +405,12 @@ public class AndLessSrv extends Service {
 	              			if(initAudioMode(driver_mode))	k = apePlay(ctx,files[cur_pos],times[cur_pos]+cur_start);
 	              		} else if(files[cur_pos].endsWith(".flac") || files[cur_pos].endsWith(".FLAC")) {
 	              			if(initAudioMode(driver_mode)) k = flacPlay(ctx,files[cur_pos],times[cur_pos]+cur_start);
-						} else if(files[cur_pos].endsWith(".wav") || files[cur_pos].endsWith(".WAV")) {
+	              		} else if(files[cur_pos].endsWith(".m4a") || files[cur_pos].endsWith(".M4A")) {
+	              			if(initAudioMode(driver_mode)) k = alacPlay(ctx,files[cur_pos],times[cur_pos]+cur_start);
+	              			if(k == LIBLOSSLESS_ERR_FORMAT) {	// maybe it's not apple lossless
+	              				if(initAudioMode(MODE_NONE)) k = extPlay(files[cur_pos],cur_start);
+	              			}
+	              		} else if(files[cur_pos].endsWith(".wav") || files[cur_pos].endsWith(".WAV")) {
 							if(initAudioMode(driver_mode)) k = wavPlay(ctx,files[cur_pos],times[cur_pos]+cur_start);
 						} else if(files[cur_pos].endsWith(".wv") || files[cur_pos].endsWith(".WV")) {
 							if(initAudioMode(driver_mode)) k = wvPlay(ctx,files[cur_pos],times[cur_pos]+cur_start);

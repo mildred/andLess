@@ -243,6 +243,7 @@ static JNINativeMethod methods[] = {
  { "audioGetDuration", "(I)I", (void *) Java_net_avs234_AndLessSrv_audioGetDuration },
  { "audioGetCurPosition", "(I)I", (void *) Java_net_avs234_AndLessSrv_audioGetCurPosition },
  { "audioSetVolume", "(II)Z", (void *) Java_net_avs234_AndLessSrv_audioSetVolume },
+ { "alacPlay", "(ILjava/lang/String;I)I", (void *) Java_net_avs234_AndLessSrv_alacPlay },
  { "flacPlay", "(ILjava/lang/String;I)I", (void *) Java_net_avs234_AndLessSrv_flacPlay },
  { "apePlay", "(ILjava/lang/String;I)I", (void *) Java_net_avs234_AndLessSrv_apePlay },
  { "wavPlay", "(ILjava/lang/String;I)I", (void *) Java_net_avs234_AndLessSrv_wavPlay },
