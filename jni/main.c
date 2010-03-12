@@ -195,7 +195,7 @@ static jobject giface;
 void update_track_time(JNIEnv *env, jobject obj, int time) {
 //     jclass cls = (*env)->GetObjectClass(env, obj);
 
-#if 0
+#ifndef AVSREMOTE
      jclass cls = (*env)->GetObjectClass(env, obj);
      jmethodID mid = (*env)->GetStaticMethodID(env, cls, "updateTrackLen", "(I)V");
      if (mid == NULL) {
@@ -232,6 +232,7 @@ void update_track_time(JNIEnv *env, jobject obj, int time) {
 }
 
 
+#ifdef AVSREMOTE
 static const char *classPathName = "net/avs234/AndLessSrv";
 
 static JNINativeMethod methods[] = {
@@ -291,7 +292,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     
    return JNI_VERSION_1_4;
 }
-
+#endif
 
 
 

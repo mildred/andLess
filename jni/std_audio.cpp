@@ -22,18 +22,21 @@ void libmedia_exit(msm_ctx *ctx) {
 int libmedia_start(msm_ctx *ctx, int channels, int samplerate) {
 
    if(!ctx) return LIBLOSSLESS_ERR_NOCTX;
-
   __android_log_print(ANDROID_LOG_INFO,"liblossless","libmedia_start chans=%d rate=%d afd=%d atrack=%p",
                 channels, samplerate,ctx->afd,ctx->track);
-#if 0
-   if(ctx->track) delete (AudioTrack *) ctx->track;
-#else
-   if(ctx->track) {
-//	((AudioTrack *)ctx->track)->start();
+#if 1 
+   if(ctx->track && ctx->samplerate == samplerate && ctx->channels == channels) {
+	((AudioTrack *) ctx->track)->stop();
+	((AudioTrack *) ctx->track)->flush();
 	((AudioTrack *)ctx->track)->start();
 	return 0; 
    }	
 #endif
+   if(ctx->track) {
+	((AudioTrack *) ctx->track)->stop();
+	((AudioTrack *) ctx->track)->flush();
+	delete (AudioTrack *) ctx->track;
+   }	
    ctx->track = 0;	
    AudioTrack* atrack = new AudioTrack();
 
@@ -69,7 +72,6 @@ void libmedia_stop(msm_ctx *ctx) {
   if(ctx && ctx->track) {
 #if 0
 	((AudioTrack *) ctx->track)->stop();
-
   __android_log_print(ANDROID_LOG_INFO,"liblossless","libmetia_stop: audio track stopped!");
 	((AudioTrack *) ctx->track)->flush();
   __android_log_print(ANDROID_LOG_INFO,"liblossless","libmetia_stop: audio track flushed!");

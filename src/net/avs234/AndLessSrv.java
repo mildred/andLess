@@ -32,7 +32,7 @@ public class AndLessSrv extends Service {
 	static {
 		System.loadLibrary("lossless");
 	}
-	
+	/*
 	public static native int 		audioInit(int ctx, int mode);	
 	public static native boolean	audioExit(int ctx);
 	public static native boolean	audioStop(int ctx);
@@ -49,6 +49,26 @@ public class AndLessSrv extends Service {
 	public static native int		wavPlay(int ctx,String file, int start);
 	public static native int		wvPlay(int ctx,String file, int start);
 	public static native int		mpcPlay(int ctx,String file, int start);
+	*/
+	
+	
+	public native int 		audioInit(int ctx, int mode);	
+	public native boolean	audioExit(int ctx);
+	public native boolean	audioStop(int ctx);
+	public native boolean	audioPause(int ctx);
+	public native boolean	audioResume(int ctx);
+	
+	public native int		audioGetDuration(int ctx);
+	public native int		audioGetCurPosition(int ctx);
+	public native boolean	audioSetVolume(int ctx, int vol);
+	
+	public native int		alacPlay(int ctx,String file, int start);
+	public native int		flacPlay(int ctx,String file, int start);
+	public native int		apePlay(int ctx,String file, int start);
+	public native int		wavPlay(int ctx,String file, int start);
+	public native int		wvPlay(int ctx,String file, int start);
+	public native int		mpcPlay(int ctx,String file, int start);
+	
 	
 	// errors returned by xxxPlay functions
 	public static final int LIBLOSSLESS_ERR_NOCTX = 1;
@@ -61,7 +81,7 @@ public class AndLessSrv extends Service {
 	public static final int LIBLOSSLESS_ERR_AU_SETUP = 9;
 	public static final int LIBLOSSLESS_ERR_AU_START = 10;
 	public static final int LIBLOSSLESS_ERR_IO_WRITE = 11;
-	public static final int LIBLOSSLESS_ERR_IO_READ = 12;
+	public static 	final int LIBLOSSLESS_ERR_IO_READ = 12;
 	public static final int LIBLOSSLESS_ERR_DECODE = 13;
 	public static final int LIBLOSSLESS_ERR_OFFSET = 14;
 	public static final int LIBLOSSLESS_ERR_NOMEM = 15;
@@ -363,8 +383,7 @@ public class AndLessSrv extends Service {
 			if(ctx == 0) return 0;
 			return audioGetDuration(ctx);
 		}
-		
-		
+				
 		private class PlayThread extends Thread {
 			private int tid = -1;
 			public void run() {
