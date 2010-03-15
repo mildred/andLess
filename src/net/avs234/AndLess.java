@@ -78,10 +78,10 @@ public class AndLess extends Activity implements Comparator<File> {
     	private boolean playlist_changed = false;
     	
     	private void log_msg(String msg) {
-    		Log.i(getClass().getSimpleName(), msg);
+//    		Log.i(getClass().getSimpleName(), msg);
     	}
     	private void log_err(String msg) {
-    		Log.e(getClass().getSimpleName(), msg);
+//    		Log.e(getClass().getSimpleName(), msg);
     	}
 
   		
@@ -437,6 +437,8 @@ public class AndLess extends Activity implements Comparator<File> {
     			File book_file;
         		String s =  srv.get_cur_dir();
 
+        		if(!prefs.savebooks) return;
+        		
         		if (hasPlistExt(s) || hasCueExt(s)) {
         			i = s.lastIndexOf('/');
     				book_file = new File(s.substring(0, i)+"/resume.bmark");
@@ -450,7 +452,7 @@ public class AndLess extends Activity implements Comparator<File> {
     					srv.get_cur_seconds() - srv.get_cur_track_start(), srv.get_cur_pos());   
     			writer.write(g);
    			   	writer.close();
-   			   	log_msg("SAVING BOOK: " + book_file.toString() + ": " + g);
+   			   	log_msg("Saving bookmark: " + book_file.toString() + ": " + g);
     		} catch (Exception e) { 
 				log_err("exception in saveBook: " + e.toString()); 
 			}
@@ -806,11 +808,13 @@ public class AndLess extends Activity implements Comparator<File> {
         	public String plist_path;
         	public String plist_name;
         	public boolean shuffle;
+        	public boolean savebooks;
         	public int driver_mode;
         	public void load() {
         		SharedPreferences shpr = getSharedPreferences(PREFS_NAME, 0);
                 theme = shpr.getInt("theme", 0);		fsize = shpr.getFloat("fsize", 16.0f);
                 layout = shpr.getInt("layout", 0);		shuffle = shpr.getBoolean("shuffle", false);		
+                savebooks = shpr.getBoolean("save_books", false);
                 driver_mode = shpr.getInt("driver_mode", AndLessSrv.MODE_LIBMEDIA);
                 last_path = shpr.getString("last_path", null);
                 plist_path = shpr.getString("plist_path", Environment.getExternalStorageDirectory().toString());
@@ -822,6 +826,7 @@ public class AndLess extends Activity implements Comparator<File> {
         	  	SharedPreferences.Editor editor = shpr.edit();
         	  	editor.putInt("theme", theme);			editor.putFloat("fsize", fsize);
         	  	editor.putInt("layout", layout);		editor.putBoolean("shuffle", shuffle);
+        	  	editor.putBoolean("save_books", savebooks);
         	  	editor.putInt("driver_mode", driver_mode);
         	  	if(cur_path != null) editor.putString("last_path", cur_path.toString());
         	  	if(plist_path != null) editor.putString("plist_path", plist_path);
@@ -878,7 +883,7 @@ public class AndLess extends Activity implements Comparator<File> {
       	static final int EDIT_PLAYLIST_DLG = 2;
       	
       	private RadioGroup rl, rt, rf;
-      	private CheckBox chk, chkm;
+      	private CheckBox chk, chkm, chkb;
       	
       	private OnCheckedChangeListener ochl = new  OnCheckedChangeListener() {
 			public void onCheckedChanged(RadioGroup group, int id) {
@@ -945,6 +950,7 @@ public class AndLess extends Activity implements Comparator<File> {
    				rf = (RadioGroup) dialog.findViewById(R.id.RadioFont);
    				chk = (CheckBox) dialog.findViewById(R.id.CheckShuffle);
    				chkm = (CheckBox) dialog.findViewById(R.id.CheckMode);
+   				chkb = (CheckBox) dialog.findViewById(R.id.BookMode);
    				
    				if(prefs.layout == 0) rl.check(R.id.NormalLayout); else rl.check(R.id.DownLayout);
    				if(prefs.theme == 0) rt.check(R.id.NormalColors);  else rt.check(R.id.InverseColors);
@@ -954,6 +960,7 @@ public class AndLess extends Activity implements Comparator<File> {
     		
    				if(prefs.shuffle) chk.setChecked(true); else chk.setChecked(false); 
    				if(prefs.driver_mode == AndLessSrv.MODE_DIRECT) chkm.setChecked(true); else chkm.setChecked(false);
+   				if(prefs.savebooks == true) chkb.setChecked(true); else chkb.setChecked(false);
    				
    				rl.setOnCheckedChangeListener(ochl);
    				rt.setOnCheckedChangeListener(ochl);
@@ -967,9 +974,12 @@ public class AndLess extends Activity implements Comparator<File> {
    			
    								if(chk.isChecked()) prefs.shuffle = true;
    								else prefs.shuffle = false;
-    					
+
    								if(chkm.isChecked()) prefs.driver_mode = AndLessSrv.MODE_DIRECT;
-   								else prefs.driver_mode = AndLessSrv.MODE_LIBMEDIA;
+   								else  prefs.driver_mode = AndLessSrv.MODE_LIBMEDIA;
+
+   								if(chkb.isChecked()) prefs.savebooks = true;
+   								else  prefs.savebooks = false;
    								
    								if(prefs.theme == 0) setTheme(android.R.style.Theme_Black);
    								else setTheme(android.R.style.Theme_Light);
@@ -1028,18 +1038,26 @@ public class AndLess extends Activity implements Comparator<File> {
        		    				}
        		    			} else filez.add(files.get(cur_longpressed).toString());
        		    			
+       		    			String cstats = new String("createNewFile()");
+       		    			int i;
        		    			try {
        		    			    boolean append = true;
        		    				if(!plist_file.exists()) {
        		    					plist_file.createNewFile(); append = false;
        		    				}
-       		    				BufferedWriter writer = new BufferedWriter(new FileWriter(plist_file, append), 8192);
-       		    			    for(int i = 0; i < filez.size(); i++) writer.write(filez.get(i) + "\n");
-       		    			    writer.close();
+       		    				cstats = new String("FileWiter()");
+       		    				FileWriter fw = new FileWriter(plist_file, append);
+       		    				cstats = new String("BufferedWriter()");
+       		    				BufferedWriter writer = new BufferedWriter(fw, 8192);
+       		    				cstats = new String("write()");
+       		    				for(i = 0; i < filez.size(); i++) writer.write(filez.get(i) + "\n");
+       		    				cstats = new String("close()");
+       		    				writer.close();
            		    			prefs.plist_path = new String(spath);
            		    			prefs.plist_name = new String(sname);
        		    			} catch (Exception e) {
-       		    				Toast.makeText(getApplicationContext(), R.string.strIOError, Toast.LENGTH_SHORT).show();
+       		    				//Toast.makeText(getApplicationContext(), R.string.strIOError, Toast.LENGTH_SHORT).show();
+       		    				showMsg( getString(R.string.strIOError) + " in " + cstats + " while saving playlist to " + plist_file.toString());
        		    				return;
        		    			}
        		    			dismissDialog(ADD_PLAYLIST_DLG);

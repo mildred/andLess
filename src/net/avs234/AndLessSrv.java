@@ -104,10 +104,10 @@ public class AndLessSrv extends Service {
 	private NotificationManager nm = null;
 	
 	private void log_msg(String msg) {
-		Log.i(getClass().getSimpleName(), msg);
+//		Log.i(getClass().getSimpleName(), msg);
 	}
 	private void log_err(String msg) {
-		Log.e(getClass().getSimpleName(), msg);
+//		Log.e(getClass().getSimpleName(), msg);
 	}
 	
 	public static int curTrackLen = 0;

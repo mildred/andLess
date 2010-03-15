@@ -69,7 +69,8 @@
 <string name="strSrvInitFail">Server failed to initialize. Exiting!</string>
 <string name="strMplayerError">Media player error </string>
 <string name="strDriverMode">Direct hardware access</string>
-<string name="strAbout">andLess Android player for lossless audio files built on Mar  1, 2010</string>
+<string name="strSaveBooks">Auto-save bookmarks</string>
+<string name="strAbout">andLess Android player for lossless audio files built on Mar 14, 2010</string>
 <string name="strAbout1">About</string>
 <string name="strHideExt">Hide filename extensions</string>
 <string name="strErrPrefs">Cannot save preferences!</string>
