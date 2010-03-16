@@ -78,10 +78,10 @@ public class AndLess extends Activity implements Comparator<File> {
     	private boolean playlist_changed = false;
     	
     	private void log_msg(String msg) {
-//    		Log.i(getClass().getSimpleName(), msg);
+    		Log.i(getClass().getSimpleName(), msg);
     	}
     	private void log_err(String msg) {
-//    		Log.e(getClass().getSimpleName(), msg);
+    		Log.e(getClass().getSimpleName(), msg);
     	}
 
   		
@@ -540,6 +540,32 @@ public class AndLess extends Activity implements Comparator<File> {
     					String cc = srv.get_cur_dir();
     					String cdr = cur_path.toString();
     					log_msg(String.format("Attempting to play file %d in %s",(int)k - first_file_pos,cdr));
+    					String fileToPlay = files.get((int)k);
+    					if(fileToPlay.endsWith(".flac") || fileToPlay.endsWith(".FLAC")) {
+    						File q = new File(fileToPlay);
+    						String s = fileToPlay.substring(0, fileToPlay.lastIndexOf('.'))+ ".cue";
+    						File qz = new File(s);
+    						if(q.exists() && !q.isDirectory() && !qz.exists()) {
+    							int [] qq = AndLessSrv.extractFlacCUE(fileToPlay);  //srv.get_cue_from_flac(fileToPlay);
+    							if(qq != null) {
+    								log_msg("Saving embedded CUE from " + fileToPlay + " to " + s);
+    								BufferedWriter writer = new BufferedWriter(new FileWriter(s, false), 8192);
+    				    			writer.write("FILE \"" + fileToPlay.substring(fileToPlay.lastIndexOf('/')+1) + "\" WAV\n");
+    								for(int j = 0; j < qq.length; j++) {
+    									int track_time = qq[j];	
+    									String tr = String.format("  TRACK %02d AUDIO\n    TITLE \"%s %d\"\n    INDEX 01 ", 
+    											j+1, getString(R.string.strCueTrack),j+1);    											
+    									String gg = String.format((track_time < 3600) ? "%02d:%02d:00\n" : "%d:%02d:00\n", track_time/60, track_time % 60);
+    									writer.write(tr + gg);
+    								}
+    				   			   	writer.close();
+    		    					if(!setAdapter(qz)) {
+    		    						log_err("error setting adapter for new cue " + qz.toString());
+    		    					}
+    				   			   	return;
+    							} else log_msg("No embedded CUE found");
+    						}
+    					}
     					if(cc == null || cdr.compareTo(cc) != 0 || playlist_changed) {
     						playlist_changed = false;
     						if(cur_path.isDirectory()) {

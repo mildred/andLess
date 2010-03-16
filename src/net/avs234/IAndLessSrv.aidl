@@ -27,4 +27,5 @@ interface IAndLessSrv {
 	void	set_driver_mode(int mode);
 	void registerCallback(IAndLessSrvCallback cb);
     void unregisterCallback(IAndLessSrvCallback cb);
+    int []	get_cue_from_flac(in String file);
 }

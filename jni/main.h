@@ -49,6 +49,8 @@ extern JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_apePlay(JNIEnv *env, jo
 extern JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_wvPlay(JNIEnv *env, jobject obj, msm_ctx* ctx, jstring jfile, jint start);
 extern JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_mpcPlay(JNIEnv *env, jobject obj, msm_ctx* ctx, jstring jfile, jint start);
 
+extern JNIEXPORT jintArray JNICALL extract_flac_cue(JNIEnv *env, jobject obj, jstring jfile);
+
 
 #define DEFAULT_CONF_BUFSZ 		(4800*4)
 #define DEFAULT_WAV_BUFSZ 		(128*1024)

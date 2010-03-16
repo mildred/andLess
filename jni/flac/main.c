@@ -38,6 +38,11 @@
 #include "decoder.h"
 #include <android/log.h>
 
+#ifdef SWAP32
+#undef SWAP32
+#endif
+
+#define SWAP32(A,B) (((A)[(B)+0]) << 24) | (((A)[(B)+1]) << 16) | (((A)[(B)+2]) << 8) | (((A)[(B)+3]) << 0) 
 
 #if 0
 static void dump_headers(FLACContext *s)
@@ -180,7 +185,6 @@ static bool flac_init(int fd, FLACContext* fc, int start, flac_seek_t *lo, flac_
 	              offset_hi=betoh322(*(p++));
 	              offset_lo=betoh322(*(p++));
 #else
-#define SWAP32(A,B) (((A)[(B)+0]) << 24) | (((A)[(B)+1]) << 16) | (((A)[(B)+2]) << 8) | (((A)[(B)+3]) << 0) 
 	              seekpoint_hi=SWAP32(buf,0);
 	              seekpoint_lo=SWAP32(buf,4);
 	              offset_hi=SWAP32(buf,8);
@@ -439,7 +443,118 @@ static bool flac_seek(FLACContext* fc, msm_ctx *ctx,
 }
 
 
+static int *flac_read_cue(int fd)
+{
+    unsigned char buf[255];
+    int endofmetadata = 0;
+    uint32_t blocklength, *times, samplerate = 0, off_lo, off_hi;
+    uint8_t *p, i, k, j = 0, n, *cue_buf = 0;
+    uint64_t k1, k2;
 
+    if (lseek(fd, 0, SEEK_SET) < 0) return 0;
+    if (read(fd, buf, 4) < 4) return 0;
+    if (memcmp(buf,"fLaC",4) != 0) {
+
+        if(memcmp(buf, "ID3",3) !=0) return 0;
+        if (read(fd, buf, 6) < 6) return 0;
+        blocklength = buf[2] << 21;
+        blocklength += buf[3] << 14;
+        blocklength += buf[4] << 7;
+        blocklength += buf[5];
+        blocklength += 10;
+        if (lseek(fd, blocklength, SEEK_SET) < 0) return 0;
+        if (read(fd, buf, 4) < 4) return 0;
+        if (memcmp(buf,"fLaC",4) != 0) return 0;
+    }
+    while (!endofmetadata) {
+        if (read(fd, buf, 4) < 4) return 0;
+        endofmetadata=(buf[0]&0x80);
+        blocklength = (buf[1] << 16) | (buf[2] << 8) | buf[3];
+
+        if ((buf[0] & 0x7f) == 0)  { /* STREAMINFO */
+            if (read(fd, buf, blocklength) < 0) return 0;
+            samplerate = (buf[10] << 12) | (buf[11] << 4) | ((buf[12] & 0xf0) >> 4);
+	} else if ((buf[0] & 0x7f) == 5) { /* BLOCK_CUESHEET */
+	    if(!samplerate) return 0;	// STREAMINFO must be present as the first metadata block 
+	    cue_buf = (unsigned char *)	malloc(blocklength);
+	    if(!cue_buf) return 0;	
+            if(read(fd, cue_buf, blocklength) != blocklength) return 0;
+#define SIZEOF_METADATA_BLOCK_CUESHEET	 (128+8+1+258+1)
+#define SIZEOF_CUESHEET_TRACK		 (8+1+12+1+13+1)
+#define SIZEOF_CUESHEET_TRACK_INDEX	 (8+1+3)
+	    p = cue_buf + SIZEOF_METADATA_BLOCK_CUESHEET; // now pointing to CUESHEET_TRACK
+	    n = p[-1];
+	    times = (uint32_t *) malloc((n+1) * sizeof(uint32_t));	
+	    if(!times) {
+		free(cue_buf); return 0;
+	    }		
+//	__android_log_print(ANDROID_LOG_ERROR,"liblossless","Found CUE block, %d tracks", n);
+	    memset(times,0,(n+1)*sizeof(uint32_t));	
+	    for(i = 0, j = 0; i < n && j < n; i++) {
+		// CUESHEET_TRACK
+	      uint8_t idx_points, track_no = p[8];
+		off_hi = SWAP32(p,0);
+		off_lo = SWAP32(p,4);
+		k1 = (((uint64_t) off_hi) << 32) |((uint64_t) off_lo);				    	
+		p += SIZEOF_CUESHEET_TRACK; // now pointing to the first CUE_TRACK_INDEX
+		idx_points = p[-1];
+		if(track_no >= 0 && track_no <= 99) {
+		   uint8_t *p1 = p;
+		    for(k = 0; k < idx_points; k++) {	
+			if(p1[8] == 1) {	// Save INDEX 01 records only!
+	                    off_hi = SWAP32(p1,0);
+        	            off_lo = SWAP32(p1,4);
+                	    k2 = (((uint64_t) off_hi) << 32) |((uint64_t) off_lo);
+			    times[++j] = (uint32_t)((k2+k1)/samplerate);
+//	__android_log_print(ANDROID_LOG_ERROR,"liblossless","Found CUE index 01 at %d", times[j-1]);
+			    break; 		
+			}
+			p1 += SIZEOF_CUESHEET_TRACK_INDEX;
+		    }	
+		} 
+		p += idx_points*SIZEOF_CUESHEET_TRACK_INDEX;  
+	    }				
+	    free(cue_buf);
+	    if(j == 0) {
+		free(times); return 0;
+	    }	
+	    times[0] = (uint32_t) j;
+//	__android_log_print(ANDROID_LOG_ERROR,"liblossless","Returning array, len=%d", j);
+	    return (int *) times;	
+        } else {
+            /* Skip to next metadata block */
+            if (lseek(fd, blocklength, SEEK_CUR) < 0)
+            {
+                return 0;
+            }
+        }
+    }
+    return 0;
+}
+
+
+JNIEXPORT jintArray JNICALL extract_flac_cue(JNIEnv *env, jobject obj, jstring jfile) {
+
+  const char *file = (*env)->GetStringUTFChars(env,jfile,NULL);
+  int fd;	
+  int *k = 0, n;
+  jintArray ja = 0;
+    if(!file) {
+        (*env)->ReleaseStringUTFChars(env,jfile,file);  return 0;
+    }
+    fd = open(file,O_RDONLY);
+    (*env)->ReleaseStringUTFChars(env,jfile,file);
+    if(fd < 0 || (k = flac_read_cue(fd)) == 0 || (n = k[0]) == 0) {
+	if(k) free(k);
+	close(fd);
+	return 0;
+    }	
+    close(fd);
+    ja = (*env)->NewIntArray(env,n);
+    (*env)->SetIntArrayRegion(env,ja,0,n,(jint *)(k+1));    
+    free(k);	
+    return ja;
+}
 
 
 JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_flacPlay(JNIEnv *env, jobject obj, msm_ctx* ctx, jstring jfile, jint start) {

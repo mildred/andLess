@@ -234,6 +234,7 @@ void update_track_time(JNIEnv *env, jobject obj, int time) {
 
 #ifdef AVSREMOTE
 static const char *classPathName = "net/avs234/AndLessSrv";
+static const char *classPathName1 = "net/avs234/AndLess";
 
 static JNINativeMethod methods[] = {
  { "audioInit", "(II)I", (void *) Java_net_avs234_AndLessSrv_audioInit },
@@ -250,8 +251,8 @@ static JNINativeMethod methods[] = {
  { "wavPlay", "(ILjava/lang/String;I)I", (void *) Java_net_avs234_AndLessSrv_wavPlay },
  { "wvPlay", "(ILjava/lang/String;I)I", (void *) Java_net_avs234_AndLessSrv_wvPlay },
  { "mpcPlay", "(ILjava/lang/String;I)I", (void *) Java_net_avs234_AndLessSrv_mpcPlay },
+ { "extractFlacCUE", "(Ljava/lang/String;)[I", (void *) extract_flac_cue },
 };
-
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 

@@ -32,7 +32,7 @@ public class AndLessSrv extends Service {
 	static {
 		System.loadLibrary("lossless");
 	}
-	/*
+	
 	public static native int 		audioInit(int ctx, int mode);	
 	public static native boolean	audioExit(int ctx);
 	public static native boolean	audioStop(int ctx);
@@ -49,9 +49,9 @@ public class AndLessSrv extends Service {
 	public static native int		wavPlay(int ctx,String file, int start);
 	public static native int		wvPlay(int ctx,String file, int start);
 	public static native int		mpcPlay(int ctx,String file, int start);
-	*/
+	public static native int []		extractFlacCUE(String file);
 	
-	
+	/*
 	public native int 		audioInit(int ctx, int mode);	
 	public native boolean	audioExit(int ctx);
 	public native boolean	audioStop(int ctx);
@@ -68,7 +68,8 @@ public class AndLessSrv extends Service {
 	public native int		wavPlay(int ctx,String file, int start);
 	public native int		wvPlay(int ctx,String file, int start);
 	public native int		mpcPlay(int ctx,String file, int start);
-	
+	public native int []	extractFlacCUE(String file);
+	*/
 	
 	// errors returned by xxxPlay functions
 	public static final int LIBLOSSLESS_ERR_NOCTX = 1;
@@ -104,10 +105,10 @@ public class AndLessSrv extends Service {
 	private NotificationManager nm = null;
 	
 	private void log_msg(String msg) {
-//		Log.i(getClass().getSimpleName(), msg);
+		Log.i(getClass().getSimpleName(), msg);
 	}
 	private void log_err(String msg) {
-//		Log.e(getClass().getSimpleName(), msg);
+		Log.e(getClass().getSimpleName(), msg);
 	}
 	
 	public static int curTrackLen = 0;
@@ -639,6 +640,7 @@ public class AndLessSrv extends Service {
 		public void		set_driver_mode(int m) 	{ if(plist == null) return; plist.driver_mode = m; }
 		public void 	registerCallback(IAndLessSrvCallback cb) { if(cb != null) cBacks.register(cb); };
 		public void 	unregisterCallback(IAndLessSrvCallback cb) { if(cb != null) cBacks.unregister(cb); };
+	    public int []	get_cue_from_flac(String file) {return  extractFlacCUE(file); };
 	};
 	
 	///////////////////////////////////////////////////////
