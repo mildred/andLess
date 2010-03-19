@@ -161,13 +161,13 @@ public class AndLessSrv extends Service {
 			if(mplayer == null) return LIBLOSSLESS_ERR_NOCTX;
 
 			mplayer.setDataSource(file);
-/*			
+	/*		
 			mplayer.prepare();
-			
+		
 			if(start != 0) mplayer.seekTo(start*1000);
 			curTrackLen = mplayer.getDuration()/1000;
 			mplayer.start();
-*/			
+		*/	
 
 			mplayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
 				public boolean onError(MediaPlayer mp, int what, int extra) {
@@ -190,15 +190,21 @@ public class AndLessSrv extends Service {
 			});
 
 			//////////////
+			
 			mplayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
 				public void onPrepared(MediaPlayer mp) {
 					if(fck_start != 0) mplayer.seekTo(fck_start*1000);
 					curTrackLen = mplayer.getDuration()/1000;
 				}
 			});
+		
 			mplayer.prepare();
 			SystemClock.sleep(250);
+			if(start != 0) mplayer.seekTo(start*1000);
+			curTrackLen = mplayer.getDuration()/1000;
 			mplayer.start();
+			
+			
 			//////////////
 			
 			if(!mplayer.isPlaying()) return LIBLOSSLESS_ERR_INV_PARM;
