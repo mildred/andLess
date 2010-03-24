@@ -197,7 +197,7 @@ public class AndLessSrv extends Service {
 					curTrackLen = mplayer.getDuration()/1000;
 				}
 			});
-		
+			
 			mplayer.prepare();
 			SystemClock.sleep(250);
 			if(start != 0) mplayer.seekTo(start*1000);
@@ -443,7 +443,7 @@ public class AndLessSrv extends Service {
 						} else if(files[cur_pos].endsWith(".mpc") || files[cur_pos].endsWith(".MPC")) {
 							if(initAudioMode(driver_mode)) k = mpcPlay(ctx,files[cur_pos],times[cur_pos]+cur_start);
 						} else {
-							if(initAudioMode(MODE_NONE)) k = extPlay(files[cur_pos],cur_start);
+							if(initAudioMode(MODE_NONE)) k = extPlay(files[cur_pos],times[cur_pos]+cur_start);
 						}
 	              		nm.cancel(NOTIFY_ID);
 					} catch(Exception e) { 

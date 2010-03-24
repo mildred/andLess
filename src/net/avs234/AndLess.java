@@ -74,6 +74,9 @@ public class AndLess extends Activity implements Comparator<File> {
     	// Index of 1st audio file in directoryEntries list (below directories, cues, and playlists)
     	private int first_file_pos;
 
+    	// At the start, set this flag and emulate the pause if the last file was bookmarked 
+    	private boolean pause_on_start = false;
+    	
     	// Changed to true in playlists/settings dialogs
     	private boolean playlist_changed = false;
     	
@@ -83,14 +86,13 @@ public class AndLess extends Activity implements Comparator<File> {
     	private void log_err(String msg) {
     		Log.e(getClass().getSimpleName(), msg);
     	}
-
   		
     	// UI elements defined in layout xml file.
 		private Button buttUp, buttPause, buttPrev, buttNext, buttVMinus, buttVPlus, buttQuit;
     	private ListView fileList;
     	private ProgressBar pBar;
     	private String curWindowTitle = null; 	
-    	
+    	private static final String resume_bmark = "/resume.bmark";
         // Interface which is an entry point to server functions. Returned upon connection to the server. 
         private IAndLessSrv srv = null;
 
@@ -118,7 +120,6 @@ public class AndLess extends Activity implements Comparator<File> {
     	IBinder.DeathRecipient bdeath = new IBinder.DeathRecipient() {
     		public void binderDied() {
 				log_err("Binder died, trying to reconnect");
-			//	unbindService(conn);
 				conn = new_connection();
 				Intent intie = new Intent();
 				intie.setClassName("net.avs234", "net.avs234.AndLessSrv");
@@ -166,7 +167,8 @@ public class AndLess extends Activity implements Comparator<File> {
     							  else cBack.playItemChanged(true,getString(R.string.strStopped));
     						} else s = null;
     					}
-    				}	
+    				} 	
+    				
     				if(s == null) {
     					if(prefs.last_path == null || !(cur_path = new File(prefs.last_path)).exists()) {
     		            	cur_path = Environment.getExternalStorageDirectory();
@@ -176,7 +178,12 @@ public class AndLess extends Activity implements Comparator<File> {
     		            	if(!setAdapter(new File("/"))) errExit(R.string.strCantSetup);
     		            }
     		            fileList.setSelection(0);
-    		            cBack.playItemChanged(true,getString(R.string.strStopped));
+    		            if(prefs.last_played_file != null && (new File(prefs.last_played_file)).exists()) {
+        					log_msg("bookmarked, starting from paused state");
+    		            	cBack.playItemChanged(true,getString(R.string.strPaused));
+        					pause_on_start = true;
+        					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.img_play));
+    					} else cBack.playItemChanged(true,getString(R.string.strStopped));
     				}
     				srv.registerCallback(cBack);
     			} catch(RemoteException e) {log_msg("remote exception in onServiceConnected: " + e.toString()); }
@@ -198,8 +205,9 @@ public class AndLess extends Activity implements Comparator<File> {
     			try {
     				switch(func[0]) {
     					case cmd_pause:
-    						if(srv.is_paused()) {
-    	    					if(srv.resume() && srv.is_running()) {
+	    					if(pause_on_start) return change_to_pause_btn;
+	    					if(srv.is_paused()) {
+    							if(srv.resume() && srv.is_running()) {
     	    						now_playing = curWindowTitle;
     	    						if(now_playing != null) return change_to_pause_btn;
     	    						now_playing = srv.get_cur_track_name();
@@ -217,7 +225,7 @@ public class AndLess extends Activity implements Comparator<File> {
     						srv.set_driver_mode(prefs.driver_mode);
     						srv.play_prev(); break;
     	    			case cmd_next:		
-    	    				srv.set_driver_mode(prefs.driver_mode);
+    	       				srv.set_driver_mode(prefs.driver_mode);
     	    				srv.play_next(); break;
     	    			case cmd_vol_up:	
     						srv.inc_vol(); break;
@@ -230,6 +238,10 @@ public class AndLess extends Activity implements Comparator<File> {
     		protected void onPostExecute(Integer result) {
     			switch(result) {
     				case change_to_pause_btn:
+    					if(pause_on_start) {
+    						selItem.onItemClick(null, null, 0, 0); // dirty hack
+	    					pause_on_start = false;
+    					}
     					if(now_playing != null) getWindow().setTitle(now_playing);
     					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.img_pause));
     					break;
@@ -268,7 +280,7 @@ public class AndLess extends Activity implements Comparator<File> {
     							now_playing = srv.get_cur_track_name();
     							if(now_playing == null) {
     								now_playing = srv.get_cur_track_source();
-    								if(now_playing == null) {
+    								if(now_playing != null) {
     									int i = now_playing.lastIndexOf('/'); 
     									if(i >= 0) now_playing = now_playing.substring(i+1);
     								}
@@ -356,7 +368,6 @@ public class AndLess extends Activity implements Comparator<File> {
         View.OnClickListener onButtQuit = new OnClickListener() {
     		public void onClick(View v) {
     			v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),  R.anim.blink));
-    			prefs.save();
     			try {
     				if(srv != null) {
 						if(srv.is_running()) saveBook();
@@ -365,7 +376,7 @@ public class AndLess extends Activity implements Comparator<File> {
     			} catch (Exception e) {
     				log_err("exception while shutting down");
     			}
-    			
+    			prefs.save();
     			if(conn != null) {
             		log_msg("unbinding service");
             		unbindService(conn);
@@ -421,7 +432,7 @@ public class AndLess extends Activity implements Comparator<File> {
     				log_err("failed to start playing <contents>"); 
     				return false;
     			}
-    			buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.img_pause));
+    			if(!pause_on_start) buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.img_pause));
     			return true;
 			} catch (Exception e) { 
 				log_err("exception in playContents: " + e.toString()); 
@@ -431,25 +442,29 @@ public class AndLess extends Activity implements Comparator<File> {
     		
     	}
     	// Save the last played file in format "file:pos:time"
+    	// Also saves this info to preferences.
     	void saveBook() {
     		try {
         		int i;
     			File book_file;
         		String s =  srv.get_cur_dir();
 
-        		if(!prefs.savebooks) return;
-        		
         		if (hasPlistExt(s) || hasCueExt(s)) {
         			i = s.lastIndexOf('/');
-    				book_file = new File(s.substring(0, i)+"/resume.bmark");
-    			} else {
-    				book_file = new File(s +"/resume.bmark");
+    				book_file = new File(s.substring(0, i) + resume_bmark);
+        		} else {
+    				book_file = new File(s + resume_bmark);
     				s = srv.get_cur_track_source();
     			}
-    			if(book_file.exists()) book_file.delete();
+				prefs.last_played_file = new String(s);
+    			int seconds = srv.get_cur_seconds() - srv.get_cur_track_start();
+    			int index = srv.get_cur_pos();
+    			prefs.last_played_pos = index;
+    			prefs.last_played_time = seconds;
+        		if(!prefs.savebooks) return;
+        		if(book_file.exists()) book_file.delete();
     			BufferedWriter writer = new BufferedWriter(new FileWriter(book_file, false), 8192);
-    			String g = s + String.format(":%d:%d", 
-    					srv.get_cur_seconds() - srv.get_cur_track_start(), srv.get_cur_pos());   
+    			String g = s + String.format(":%d:%d", seconds, index);   
     			writer.write(g);
    			   	writer.close();
    			   	log_msg("Saving bookmark: " + book_file.toString() + ": " + g);
@@ -468,10 +483,10 @@ public class AndLess extends Activity implements Comparator<File> {
 					return;
 				}
 				
-				File f = new File(files.get((int)k));
-
-				if(f.exists()) {
-					if(f.toString().endsWith(bmark_ext)) {
+				File f = (a != null) ? f = new File(files.get((int)k)) : null;
+				
+				//if(f != null && f.exists()) {
+					if(f != null && f.toString().endsWith(bmark_ext)) {
 			    		try {
 			    			if(srv.is_running()) saveBook();
 			    			BufferedReader reader = new BufferedReader(new FileReader(f), 8192);
@@ -507,9 +522,9 @@ public class AndLess extends Activity implements Comparator<File> {
 	    	        			track = (Integer.valueOf(line.substring(end+1))).intValue();
 	    	        			log_msg("BOOK: " + fname + " ["+ track +"] @" + seconds + " cc=" + cc + " cp=" + cur_path.toString());
 	    	        			if(!setAdapter(ff)) {
-	        						log_err("error setting adapter for " + f.toString());
-	        						return;
-	        					}
+	    	        					log_err("error setting adapter for " + f.toString());
+	    	        					return;
+	    	        			}	        						
 	        					if(cc == null || cur_path.toString().compareTo(cc) != 0 || playlist_changed) {
 	        						if(hasCueExt(ff)) 
 	        							playContents(ff.toString(),files,track_names,start_times,track - first_file_pos,seconds);
@@ -531,17 +546,52 @@ public class AndLess extends Activity implements Comparator<File> {
 	    				Toast.makeText(getApplicationContext(), R.string.strBadBook, Toast.LENGTH_SHORT).show();
 	    				return;
 					}
-					if(k < first_file_pos) {	// Directory, cue or playlist was clicked in the list 
+					if(k < first_file_pos && f != null) {	// Directory, cue or playlist was clicked in the list 
     					if(!setAdapter(f)) {
     						log_err("error setting adapter for " + f.toString());
     					}
     				} else try {				// Regular file, or cue track. first_file_pos is always 0 for playlists and cues.
-						if(srv.is_running()) saveBook();
-    					String cc = srv.get_cur_dir();
-    					String cdr = cur_path.toString();
-    					log_msg(String.format("Attempting to play file %d in %s",(int)k - first_file_pos,cdr));
-    					String fileToPlay = files.get((int)k);
-    					if(fileToPlay.endsWith(".flac") || fileToPlay.endsWith(".FLAC")) {
+						if(srv.is_running() && f != null) saveBook();
+    					String cc;
+    					String cdr;
+    					String fileToPlay = null;
+    					int curpos;
+    					int curtime;
+    					if(f == null) {
+    						if(prefs.last_played_file == null) return;
+    						File ff = new File(prefs.last_played_file);
+    						if(!ff.exists()) return;
+    						if(hasPlistExt(ff) || hasCueExt(ff)) {
+	    	        			if(!setAdapter(ff)) {
+	    	        					log_err("error setting adapter for " + ff.toString());
+	    	        					return;
+	    	        			}
+	    	        			cdr = cur_path.toString();
+    						} else {
+    							curpos = prefs.last_played_file.lastIndexOf('/');
+    							if(curpos < 0) return;
+    							cdr =  prefs.last_played_file.substring(0, curpos);
+    		        			if(!setAdapter(new File(cdr))) {
+    	        					log_err("error setting adapter for " + ff.toString());
+    	        					return;
+    		        			}
+    						}
+    						fileToPlay =  null;
+    						curpos = prefs.last_played_pos;
+    						curtime = prefs.last_played_time;
+    						
+    						cc = null;
+    						log_msg(String.format("Resuming from file %s in %s, idx=%d time=%d",prefs.last_played_file, cdr,curpos,curtime));
+    					} else {
+    						curpos = (int)k - first_file_pos;
+    						curtime = 0;
+    						cc = srv.get_cur_dir();
+    						cdr = cur_path.toString();
+    						fileToPlay = files.get((int)k);
+    						log_msg(String.format("Attempting to play file %d in %s",(int)k - first_file_pos,cdr));
+    					}
+    					    					    					
+    					if(fileToPlay != null && (fileToPlay.endsWith(".flac") || fileToPlay.endsWith(".FLAC"))) {
     						File q = new File(fileToPlay);
     						String s = fileToPlay.substring(0, fileToPlay.lastIndexOf('.'))+ ".cue";
     						File qz = new File(s);
@@ -571,15 +621,15 @@ public class AndLess extends Activity implements Comparator<File> {
     						if(cur_path.isDirectory()) {
     							ArrayList<String> filly = new ArrayList<String>();
     							for(int j = first_file_pos; j < files.size(); j++) filly.add(files.get(j));
-    							playContents(cdr,filly,null,null,(int)k  - first_file_pos,0);
+    							playContents(cdr,filly,null,null,curpos,curtime);
     						} else if(hasCueExt(cdr)) {
-    							playContents(cdr,files,track_names,start_times,(int)k - first_file_pos,0);
+    							playContents(cdr,files,track_names,start_times,curpos,curtime);
     						} else if(hasPlistExt(cdr)) {
-    							playContents(cdr,files,null,null,(int)k - first_file_pos,0);
+    							playContents(cdr,files,null,null,curpos,curtime);
     						}
     					} else {
     						srv.set_driver_mode(prefs.driver_mode);
-    						if(!srv.play((int)k - first_file_pos,0)) {
+    						if(!srv.play(curpos,curtime)){
     							Toast.makeText(getApplicationContext(), R.string.strSrvFail, Toast.LENGTH_SHORT).show();
     							log_err("failed to start playing <single file>"); 
     						}
@@ -589,7 +639,7 @@ public class AndLess extends Activity implements Comparator<File> {
     					e.printStackTrace();
     					log_err("exception in selItem: " + e.toString()); 
     				}
-    			} else log_err("Attempt to play non-existing file " + f.toString());
+    			//} else log_err("Attempt to play non-existing file");
     		}
     	};
 
@@ -766,7 +816,7 @@ public class AndLess extends Activity implements Comparator<File> {
 
     	@Override
         public void onCreate(Bundle savedInstanceState) {
-    		
+
     		super.onCreate(savedInstanceState);
 
     		prefs = new Prefs();
@@ -833,9 +883,12 @@ public class AndLess extends Activity implements Comparator<File> {
         	public String last_path;
         	public String plist_path;
         	public String plist_name;
+        	public String last_played_file;
         	public boolean shuffle;
         	public boolean savebooks;
         	public int driver_mode;
+        	public int last_played_pos;
+        	public int last_played_time;
         	public void load() {
         		SharedPreferences shpr = getSharedPreferences(PREFS_NAME, 0);
                 theme = shpr.getInt("theme", 0);		fsize = shpr.getFloat("fsize", 16.0f);
@@ -843,6 +896,9 @@ public class AndLess extends Activity implements Comparator<File> {
                 savebooks = shpr.getBoolean("save_books", false);
                 driver_mode = shpr.getInt("driver_mode", AndLessSrv.MODE_LIBMEDIA);
                 last_path = shpr.getString("last_path", null);
+                last_played_file = shpr.getString("last_played_file", null);
+                last_played_pos = shpr.getInt("last_played_pos",0);
+                last_played_time = shpr.getInt("last_played_time",0);
                 plist_path = shpr.getString("plist_path", Environment.getExternalStorageDirectory().toString());
                 plist_name = shpr.getString("plist_name", "Favorites");
         	}
@@ -857,7 +913,13 @@ public class AndLess extends Activity implements Comparator<File> {
         	  	if(cur_path != null) editor.putString("last_path", cur_path.toString());
         	  	if(plist_path != null) editor.putString("plist_path", plist_path);
         	  	if(plist_name != null) editor.putString("plist_name", plist_name);
+        	  	if(last_played_file != null) {
+        	  		editor.putString("last_played_file", last_played_file);
+        	  		editor.putInt("last_played_pos", last_played_pos);
+        	  		editor.putInt("last_played_time", last_played_time);
+        	  	}
         	  	if(!editor.commit()) showMsg(getString(R.string.strErrPrefs));
+        	  	
         	}
         }
         
