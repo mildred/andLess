@@ -56,6 +56,8 @@ import net.avs234.iconifiedlist.IconifiedTextListAdapter;
 
 public class AndLess extends Activity implements Comparator<File> {
 	
+		// skvalex
+	
     	// Current directory **OR** current cue/playlist file
     	private File cur_path = null;
 
