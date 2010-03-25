@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 /** @author Steven Osborn - http://steven.bitsetters.com */
 public class IconifiedTextListAdapter extends BaseAdapter {
+	
+		LayoutInflater factory; 
 
         /** Remember our context so we can use it when constructing views. */
         private Context mContext;
@@ -21,6 +23,7 @@ public class IconifiedTextListAdapter extends BaseAdapter {
 
         public IconifiedTextListAdapter(Context context) {
                 mContext = context;
+                factory = LayoutInflater.from(context);
         }
 
         public void addItem(IconifiedText it) { mItems.add(it); }
@@ -46,7 +49,7 @@ public class IconifiedTextListAdapter extends BaseAdapter {
         /** @param convertView The old view to overwrite, if one is passed
          * @returns a IconifiedTextView that holds wraps around an IconifiedText */
         public View getView(int position, View convertView, ViewGroup parent) {
-        	LayoutInflater factory = LayoutInflater.from(mContext);
+        	
         	View newView = factory.inflate(R.layout.row, null);
                 
             TextView txtView = (TextView)newView.findViewById(R.id.title);
