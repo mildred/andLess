@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="horizontal"
+	android:layout_height="fill_parent" 
+	android:layout_width="fill_parent"
+	android:background="#cccccc"
+	android:gravity="center">
+
+<Button android:layout_width="wrap_content" 
+android:layout_height="wrap_content" 
+android:id="@+id/ButtonVMinus"  android:background="@drawable/vol_minus">
+</Button>
+
+<Button 
+android:layout_width="wrap_content" 
+android:layout_height="wrap_content" 
+android:id="@+id/ButtonVPlus"  android:background="@drawable/vol_plus">
+</Button>
+</LinearLayout>

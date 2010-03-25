@@ -72,10 +72,12 @@
 <string name="strSaveBooks">Auto-save bookmarks</string>
 <string name="strAbout">andLess Android player for lossless audio files built on Mar 24, 2010</string>
 <string name="strAbout1">About</string>
+<string name="strQuit">Quit</string>
 <string name="strHideExt">Hide filename extensions</string>
 <string name="strErrPrefs">Cannot save preferences!</string>
 <string name="strErrSrvIf">Server returned null binder interface</string>
 <string name="strErrSrvZero">Binder is null on button press</string>
 <string name="strBadBook">Invalid bookmark file</string>
 <string name="strCueTrack">Track</string>
+<string name="strBSettings">Basic settings</string>
 </resources>

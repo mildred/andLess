@@ -1,14 +1,15 @@
 package net.avs234.iconifiedlist;
 
-
 import java.util.ArrayList;
 import java.util.List;
-
+import net.avs234.R;
 import android.content.Context;
-import android.graphics.Color;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 /** @author Steven Osborn - http://steven.bitsetters.com */
 public class IconifiedTextListAdapter extends BaseAdapter {
@@ -41,26 +42,19 @@ public class IconifiedTextListAdapter extends BaseAdapter {
         public long getItemId(int position) {
                 return position;
         }
-        
-        private float fsize = 16.0f;
-        
+       
         /** @param convertView The old view to overwrite, if one is passed
          * @returns a IconifiedTextView that holds wraps around an IconifiedText */
         public View getView(int position, View convertView, ViewGroup parent) {
-                IconifiedTextView btv;
-                if (convertView == null) {
-                        btv = new IconifiedTextView(mContext, mItems.get(position));
-                        btv.setTextSize(fsize);
-                } else { // Reuse/Overwrite the View passed
-                        // We are assuming(!) that it is castable!
-                        btv = (IconifiedTextView) convertView;
-                        btv.setText(mItems.get(position).getText());
-                        btv.setTextSize(fsize);
-                        btv.setIcon(mItems.get(position).getIcon());
-                }
-                return btv;
-        }
-        public void setFontSize(float f) {
-        	fsize = f;
+        	LayoutInflater factory = LayoutInflater.from(mContext);
+        	View newView = factory.inflate(R.layout.row, null);
+                
+            TextView txtView = (TextView)newView.findViewById(R.id.title);
+            txtView.setText(mItems.get(position).getText());
+                	
+            ImageView imgView = (ImageView)newView.findViewById(R.id.icon);
+            imgView.setImageDrawable(mItems.get(position).getIcon());
+                
+           return newView;
         }
 }

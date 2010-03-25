@@ -5,13 +5,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -29,10 +30,10 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -44,19 +45,17 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.RadioGroup;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.RadioGroup.OnCheckedChangeListener;
 
 import net.avs234.iconifiedlist.IconifiedText;
 import net.avs234.iconifiedlist.IconifiedTextListAdapter;
 
 public class AndLess extends Activity implements Comparator<File> {
-	
-		// skvalex
 	
     	// Current directory **OR** current cue/playlist file
     	private File cur_path = null;
@@ -90,9 +89,10 @@ public class AndLess extends Activity implements Comparator<File> {
     	}
   		
     	// UI elements defined in layout xml file.
-		private Button buttUp, buttPause, buttPrev, buttNext, buttVMinus, buttVPlus, buttQuit;
+		private Button buttPause, buttPrev, buttNext, buttVMinus, buttVPlus, ButtonVolume;
+		private TextView nowTime, allTime;
     	private ListView fileList;
-    	private ProgressBar pBar;
+    	private SeekBar pBar;
     	private String curWindowTitle = null; 	
     	private static final String resume_bmark = "/resume.bmark";
         // Interface which is an entry point to server functions. Returned upon connection to the server. 
@@ -164,7 +164,7 @@ public class AndLess extends Activity implements Comparator<File> {
     							}
     							if(srv.is_paused()) { 
     								cBack.playItemChanged(true,getString(R.string.strPaused));
-    								buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.img_play));
+    								buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_play));
     							} else if(srv.is_running()) cBack.playItemChanged(false,directoryEntries.get(first_file_pos+i).getText());
     							  else cBack.playItemChanged(true,getString(R.string.strStopped));
     						} else s = null;
@@ -184,7 +184,7 @@ public class AndLess extends Activity implements Comparator<File> {
         					log_msg("bookmarked, starting from paused state");
     		            	cBack.playItemChanged(true,getString(R.string.strPaused));
         					pause_on_start = true;
-        					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.img_play));
+        					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_play));
     					} else cBack.playItemChanged(true,getString(R.string.strStopped));
     				}
     				srv.registerCallback(cBack);
@@ -245,11 +245,11 @@ public class AndLess extends Activity implements Comparator<File> {
 	    					pause_on_start = false;
     					}
     					if(now_playing != null) getWindow().setTitle(now_playing);
-    					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.img_pause));
+    					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_pause));
     					break;
     				case change_to_play_btn:    					
     					getWindow().setTitle(getString(R.string.strPaused));
-    					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.img_play));
+    					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_play));
     					break;
     			}
     		}
@@ -290,10 +290,10 @@ public class AndLess extends Activity implements Comparator<File> {
     						  }
   							}  
   	    					if(now_playing != null) getWindow().setTitle(now_playing);
-  	    					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.img_pause));
+  	    					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_pause));
   						} else if(srv.pause()) {
   	    					getWindow().setTitle(getString(R.string.strPaused));
-  	    					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.img_play));
+  	    					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_play));
   						}
  					} catch (RemoteException e) {
 						log_err("exception in pause button handler");
@@ -313,7 +313,6 @@ public class AndLess extends Activity implements Comparator<File> {
     	
     	View.OnClickListener onButtPrev= new OnClickListener() {
     		public void onClick(View v) {
-    			v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),  R.anim.blink));
     			if(samsung) {
         			try {
         				if(srv == null) errExit(R.string.strErrSrvZero);
@@ -327,7 +326,6 @@ public class AndLess extends Activity implements Comparator<File> {
     	};
     	View.OnClickListener onButtNext = new OnClickListener() {
         	public void onClick(View v) { 
-        		v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),  R.anim.blink));
         		if(samsung) {
         			try {
         				if(srv == null) errExit(R.string.strErrSrvZero);
@@ -340,7 +338,8 @@ public class AndLess extends Activity implements Comparator<File> {
         	}	
         };
         View.OnClickListener onButtVPlus = new OnClickListener() {
-        	public void onClick(View v) { 
+        	public void onClick(View v) {
+        		Log.i("AndLess.java", "onButtVMinus");
         		v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),  R.anim.blink));
         		if(samsung) {
         			try {
@@ -354,7 +353,8 @@ public class AndLess extends Activity implements Comparator<File> {
         	}	
         };
         View.OnClickListener onButtVMinus = new OnClickListener() {
-        	public void onClick(View v) { 
+        	public void onClick(View v) {
+        		Log.i("AndLess.java", "onButtVMinus");
         		v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),  R.anim.blink));
         		if(samsung) {
         			try {
@@ -366,32 +366,34 @@ public class AndLess extends Activity implements Comparator<File> {
         		} else new SendSrvCmd().execute(SendSrvCmd.cmd_vol_down); 
         	}	
         };
+        View.OnClickListener onButtonVolume = new OnClickListener() {
+        	public void onClick(View v) { 
+        		showDialog(VOLUME_DLG); 
+        	}	
+        };
     	
-        View.OnClickListener onButtQuit = new OnClickListener() {
-    		public void onClick(View v) {
-    			v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),  R.anim.blink));
-    			try {
-    				if(srv != null) {
-						if(srv.is_running()) saveBook();
-    					srv.shutdown();	
-    				}
-    			} catch (Exception e) {
-    				log_err("exception while shutting down");
-    			}
-    			prefs.save();
-    			if(conn != null) {
-            		log_msg("unbinding service");
-            		unbindService(conn);
-            		conn = null;
-            	}
-        	    Intent intie = new Intent();
-                intie.setClassName("net.avs234", "net.avs234.AndLessSrv");
-                if(!stopService(intie)) log_err("service not stopped");	
-                else log_msg("service stopped");
-                finish();
-	    		android.os.Process.killProcess(android.os.Process.myPid());
-    		}
-    	};
+    	private void ExitFromProgram() {
+    		try {
+				if(srv != null) {
+					if(srv.is_running()) saveBook();
+					srv.shutdown();	
+				}
+			} catch (Exception e) {
+				log_err("exception while shutting down");
+			}
+			prefs.save();
+			if(conn != null) {
+        		log_msg("unbinding service");
+        		unbindService(conn);
+        		conn = null;
+        	}
+    	    Intent intie = new Intent();
+            intie.setClassName("net.avs234", "net.avs234.AndLessSrv");
+            if(!stopService(intie)) log_err("service not stopped");	
+            else log_msg("service stopped");
+            finish();
+    		android.os.Process.killProcess(android.os.Process.myPid());
+    	}
   	
     	View.OnClickListener onButtUp = new OnClickListener() {
     		public void onClick(View v) {
@@ -411,6 +413,20 @@ public class AndLess extends Activity implements Comparator<File> {
 				
     		}
     	};
+    	
+    	private void onButtUp() {
+    		if(cur_path == null) return;
+			File path = cur_path.getParentFile();
+			if(path != null) {
+				int k = cur_path.toString().lastIndexOf('/');
+				String last_path = cur_path.toString().substring(k+1);
+				if(setAdapter(path)) { 
+					for(k=0; k < directoryEntries.size(); k++)
+						if(directoryEntries.get(k).getText().compareTo(last_path)==0) break;
+					fileList.setSelection(k);
+				} else log_err("cannot restore in onButtUp()");
+			}
+    	}
 
     	// Load the server playlist with contents of arrays, and play starting from the k-th item @ time start. 
     	
@@ -434,7 +450,7 @@ public class AndLess extends Activity implements Comparator<File> {
     				log_err("failed to start playing <contents>"); 
     				return false;
     			}
-    			if(!pause_on_start) buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.img_pause));
+    			if(!pause_on_start) buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_pause));
     			return true;
 			} catch (Exception e) { 
 				log_err("exception in playContents: " + e.toString()); 
@@ -479,9 +495,14 @@ public class AndLess extends Activity implements Comparator<File> {
     	AdapterView.OnItemClickListener selItem = new OnItemClickListener() {
 
     		public void onItemClick(AdapterView<?> a, View v, int i,long k) {
-
+    			
+    			if(i==0) {
+    				onButtUp();
+    				return;
+    			}
+    			k = k-1;
 				if((int) k >= files.size()) {
-					log_err("cilcked item out of range!");
+					log_err("cilcked item out of range! i: "+i+" k: "+k);
 					return;
 				}
 				
@@ -540,7 +561,7 @@ public class AndLess extends Activity implements Comparator<File> {
     							Toast.makeText(getApplicationContext(), R.string.strSrvFail, Toast.LENGTH_SHORT).show();
     							log_err("failed to start playing <bookmarked file>"); 
     						}
-    						buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.img_pause));
+    						buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_pause));
     						return;
 			    		} catch (Exception e) { 
 							log_err("exception while processing bookmark file!");
@@ -635,7 +656,7 @@ public class AndLess extends Activity implements Comparator<File> {
     							Toast.makeText(getApplicationContext(), R.string.strSrvFail, Toast.LENGTH_SHORT).show();
     							log_err("failed to start playing <single file>"); 
     						}
-    						buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.img_pause));
+    						buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_pause));
     					}
     				} catch (Exception e) { 
     					e.printStackTrace();
@@ -651,7 +672,11 @@ public class AndLess extends Activity implements Comparator<File> {
     	private int cur_longpressed = 0;
     	AdapterView.OnItemLongClickListener pressItem = new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> a, View v, int i, long k) {
-				
+				if(i==0) {
+					onButtUp();
+					return false;
+				}
+    			k = k-1;
 				if((int) k >= files.size()) {
 					log_err("long-pressed item out of range!");
 					return false;
@@ -674,6 +699,7 @@ public class AndLess extends Activity implements Comparator<File> {
 	   					Toast.makeText(getApplicationContext(), R.string.strTurnOffShuffle, Toast.LENGTH_SHORT).show();
 	   					return false;
 	   				}
+					track_longpressed = i; // set which position clicked
 					showDialog(EDIT_PLAYLIST_DLG);
 					return true;
 				}
@@ -701,7 +727,7 @@ public class AndLess extends Activity implements Comparator<File> {
 			private Handler progressUpdate = new Handler();
 			
 			private final int first_delay = 500;
-			private final int update_period = 1500;
+			private final int update_period = 500;
 			
 			private class UpdaterTask extends TimerTask {
 				public void run() {
@@ -730,6 +756,7 @@ public class AndLess extends Activity implements Comparator<File> {
 					   				}
 								//	pBar.setProgress(srv.get_cur_seconds() - AndLessSrv.curTrackStart);
 					   				pBar.setProgress(srv.get_cur_seconds() - srv.get_cur_track_start());
+					   				nowTime.setText(parseDur(srv.get_cur_seconds()*1000));
 								} catch (Exception e) { 
 									log_err("exception 1 in progress update handler: " + e.toString()); 
 								}
@@ -753,6 +780,7 @@ public class AndLess extends Activity implements Comparator<File> {
 									:	String.format("[%d:%02d:%02d] %s", track_time/3600, (track_time % 3600)/60, track_time % 60, track_name);
 								getWindow().setTitle(curWindowTitle);
 								pBar.setMax(track_time);
+								allTime.setText(parseDur(track_time*1000));
 							} catch (Exception e) { 
 								log_err("exception 2 in progress update handler: " + e.toString()); 
 							}
@@ -815,6 +843,35 @@ public class AndLess extends Activity implements Comparator<File> {
     	////////////////////////////////////////////////////////////////
     	///////////////////////// Entry point //////////////////////////
     	////////////////////////////////////////////////////////////////
+      
+        protected void onResume() {
+        	super.onResume();
+        	
+        	// getting settings
+        	SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        	boolean s_m = settings.getBoolean("shuffle_mode", false);
+        	boolean d_m = settings.getBoolean("driver_mode", false);
+        	boolean b_m = settings.getBoolean("book_mode", false);
+        	Log.i("AndLess.java", "driver_mode:"+d_m+" book_mode:"+b_m);
+        	if(d_m) {
+        		prefs.driver_mode = AndLessSrv.MODE_DIRECT;
+        	} else {
+        		prefs.driver_mode = AndLessSrv.MODE_LIBMEDIA;
+        	}
+			if(b_m) {
+				prefs.savebooks = true;
+			} else {
+				prefs.savebooks = false;
+			}
+			if(s_m != prefs.shuffle) {
+				playlist_changed = true;
+			}
+			if(s_m) {
+				prefs.shuffle = true;
+			} else {
+				prefs.shuffle = false;
+			}
+        }
 
     	@Override
         public void onCreate(Bundle savedInstanceState) {
@@ -824,16 +881,12 @@ public class AndLess extends Activity implements Comparator<File> {
     		prefs = new Prefs();
             prefs.load();
 
-            if(prefs.theme == 1) setTheme(android.R.style.Theme_Light);
-            else setTheme(android.R.style.Theme_Black);
-            
-            if(prefs.layout == 1) setContentView(R.layout.lower);            
-            else setContentView(R.layout.main);
-            
+            // ui preferences
+            setTheme(android.R.style.Theme_Light);
+            setContentView(R.layout.main);
             setContent();
-
-			if(prefs.theme == 0) fileList.setBackgroundResource(android.R.color.background_dark);
-			else fileList.setBackgroundResource(android.R.color.background_light); 
+            
+			fileList.setBackgroundResource(android.R.color.background_light); 
             
             buttPause.setEnabled(true);
 
@@ -879,9 +932,6 @@ public class AndLess extends Activity implements Comparator<File> {
         class Prefs {
         	
         	public static final String PREFS_NAME = "prefs_avs234";
-        	public int theme;
-        	public int layout;
-        	public float fsize;
         	public String last_path;
         	public String plist_path;
         	public String plist_name;
@@ -893,8 +943,7 @@ public class AndLess extends Activity implements Comparator<File> {
         	public int last_played_time;
         	public void load() {
         		SharedPreferences shpr = getSharedPreferences(PREFS_NAME, 0);
-                theme = shpr.getInt("theme", 0);		fsize = shpr.getFloat("fsize", 16.0f);
-                layout = shpr.getInt("layout", 0);		shuffle = shpr.getBoolean("shuffle", false);		
+                shuffle = shpr.getBoolean("shuffle", false);		
                 savebooks = shpr.getBoolean("save_books", false);
                 driver_mode = shpr.getInt("driver_mode", AndLessSrv.MODE_LIBMEDIA);
                 last_path = shpr.getString("last_path", null);
@@ -908,8 +957,7 @@ public class AndLess extends Activity implements Comparator<File> {
         	public void save() {
         	  	SharedPreferences shpr = getSharedPreferences(PREFS_NAME, 0);
         	  	SharedPreferences.Editor editor = shpr.edit();
-        	  	editor.putInt("theme", theme);			editor.putFloat("fsize", fsize);
-        	  	editor.putInt("layout", layout);		editor.putBoolean("shuffle", shuffle);
+        	  	editor.putBoolean("shuffle", shuffle);
         	  	editor.putBoolean("save_books", savebooks);
         	  	editor.putInt("driver_mode", driver_mode);
         	  	if(cur_path != null) editor.putString("last_path", cur_path.toString());
@@ -941,24 +989,21 @@ public class AndLess extends Activity implements Comparator<File> {
     	
     	private void setContent() {
             setRequestedOrientation(1);
-            buttUp = (Button) findViewById(R.id.ButtonUp);
             buttPause = (Button) findViewById(R.id.ButtonPause);
             buttPrev = (Button) findViewById(R.id.ButtonPrev);
             buttNext = (Button) findViewById(R.id.ButtonNext);
-            buttVMinus = (Button) findViewById(R.id.ButtonVMinus);
-            buttVPlus = (Button) findViewById(R.id.ButtonVPlus);
-            buttQuit = (Button) findViewById(R.id.ButtonQuit);
+            
+            ButtonVolume = (Button) findViewById(R.id.ButtonVolume);
             fileList = (ListView) findViewById(R.id.FileList);
-            pBar = (ProgressBar) findViewById(R.id.PBar);
-            buttUp.setOnClickListener(onButtUp);
+            nowTime = (TextView) findViewById(R.id.nowTime);
+            allTime = (TextView) findViewById(R.id.allTime);
+            pBar = (SeekBar) findViewById(R.id.PBar);
             buttPause.setOnClickListener(onButtPause);
             buttPrev.setOnClickListener(onButtPrev);
             buttNext.setOnClickListener(onButtNext);
-            buttVMinus.setOnClickListener(onButtVMinus);
-            buttVPlus.setOnClickListener(onButtVPlus);
-            buttQuit.setOnClickListener(onButtQuit);
             fileList.setOnItemClickListener(selItem);
             fileList.setOnItemLongClickListener(pressItem);
+            ButtonVolume.setOnClickListener(onButtonVolume);
             enableVolumeButtons(prefs.driver_mode == AndLessSrv.MODE_DIRECT);
             try {
 				if(srv != null && srv.is_running()) //pBar.setMax(AndLessSrv.curTrackLen);
@@ -971,22 +1016,11 @@ public class AndLess extends Activity implements Comparator<File> {
       	static final int SETTINGS_DLG = 0;
       	static final int ADD_PLAYLIST_DLG = 1;
       	static final int EDIT_PLAYLIST_DLG = 2;
+      	static final int VOLUME_DLG = 3;
       	
-      	private RadioGroup rl, rt, rf;
+      	private RadioGroup rt, rf;
       	private CheckBox chk, chkm, chkb;
       	
-      	private OnCheckedChangeListener ochl = new  OnCheckedChangeListener() {
-			public void onCheckedChanged(RadioGroup group, int id) {
-				if(group == rl) prefs.layout = (id == R.id.NormalLayout) ? 0 : 1;
-				else if(group == rt) prefs.theme = (id == R.id.NormalColors) ? 0 : 1;
-				else switch(id) {
-						case R.id.Font12: prefs.fsize = 12.0f; break;
-						case R.id.Font16: prefs.fsize = 16.0f; break;
-						case R.id.Font20: prefs.fsize = 20.0f; break;
-						case R.id.Font24: prefs.fsize = 24.0f; break;
-					 }; 
-			}
-		};
 
 		View.OnClickListener oncl = new OnClickListener() {
     		public void onClick(View v) {  
@@ -1011,6 +1045,10 @@ public class AndLess extends Activity implements Comparator<File> {
        				thisDialog = dialog;
        				thisDialog.setTitle(curRowIs + " " + (track_longpressed + 1));
        				break;
+    			/*case EDIT_PLAYLIST_DLG:
+    			AlertDialog submenu = (AlertDialog) dialog;
+    			submenu.setTitle(directoryEntries.get(track_longpressed).getText().toString());
+    			break;*/
     		   	case ADD_PLAYLIST_DLG:
     		   		thisDialog = dialog;
        				dialog.setTitle(getString(R.string.strAddPlist));
@@ -1021,6 +1059,12 @@ public class AndLess extends Activity implements Comparator<File> {
        				File f = new File(files.get(cur_longpressed));
        				if(!f.isDirectory()) chb.setEnabled(false);  else chb.setEnabled(true);
        				break;
+    		   	case VOLUME_DLG:
+    		   		buttVMinus = (Button) dialog.findViewById(R.id.ButtonVMinus);
+       	            buttVPlus = (Button) dialog.findViewById(R.id.ButtonVPlus);
+       	            buttVMinus.setOnClickListener(onButtVMinus);
+       	            buttVPlus.setOnClickListener(onButtVPlus);
+       			break;
     		   	default:
     				break;
     		}
@@ -1035,26 +1079,15 @@ public class AndLess extends Activity implements Comparator<File> {
     			dialog.setContentView(R.layout.settings);
    				dialog.setTitle(R.string.strSettings);
     		
-   				rl = (RadioGroup) dialog.findViewById(R.id.RadioLayout);
-   				rt = (RadioGroup) dialog.findViewById(R.id.RadioTheme);
-   				rf = (RadioGroup) dialog.findViewById(R.id.RadioFont);
    				chk = (CheckBox) dialog.findViewById(R.id.CheckShuffle);
    				chkm = (CheckBox) dialog.findViewById(R.id.CheckMode);
    				chkb = (CheckBox) dialog.findViewById(R.id.BookMode);
    				
-   				if(prefs.layout == 0) rl.check(R.id.NormalLayout); else rl.check(R.id.DownLayout);
-   				if(prefs.theme == 0) rt.check(R.id.NormalColors);  else rt.check(R.id.InverseColors);
-    	
-   				if(prefs.fsize == 12.0f) rf.check(R.id.Font12);  		else if(prefs.fsize == 16.0f) rf.check(R.id.Font16);
-   				else if(prefs.fsize == 20.0f) rf.check(R.id.Font20);	else rf.check(R.id.Font24);
-    		
+
    				if(prefs.shuffle) chk.setChecked(true); else chk.setChecked(false); 
    				if(prefs.driver_mode == AndLessSrv.MODE_DIRECT) chkm.setChecked(true); else chkm.setChecked(false);
    				if(prefs.savebooks == true) chkb.setChecked(true); else chkb.setChecked(false);
    				
-   				rl.setOnCheckedChangeListener(ochl);
-   				rt.setOnCheckedChangeListener(ochl);
-   				rf.setOnCheckedChangeListener(ochl);
     		
    				dialog.setOnDismissListener(
    						new DialogInterface.OnDismissListener() {
@@ -1071,16 +1104,13 @@ public class AndLess extends Activity implements Comparator<File> {
    								if(chkb.isChecked()) prefs.savebooks = true;
    								else  prefs.savebooks = false;
    								
-   								if(prefs.theme == 0) setTheme(android.R.style.Theme_Black);
-   								else setTheme(android.R.style.Theme_Light);
+   								setTheme(android.R.style.Theme_Light);
     					
-   								if(prefs.layout == 0) setContentView(R.layout.main);
-   								else setContentView(R.layout.lower);
+   								setContentView(R.layout.main);
    								
    								setContent(); 
 
-   								if(prefs.theme == 0) fileList.setBackgroundResource(android.R.color.background_dark);
-   								else fileList.setBackgroundResource(android.R.color.background_light); 
+   								fileList.setBackgroundResource(android.R.color.background_light); 
 
    								if(!setAdapter(cur_path)) log_err("this cannot happen!");
    							}
@@ -1264,6 +1294,22 @@ public class AndLess extends Activity implements Comparator<File> {
    		    	});
    				// tvRow = (TextView) dialog.findViewById(R.id.TextRow);
    				return dialog;
+   			/*case EDIT_PLAYLIST_DLG:
+	        	AlertDialog.Builder submenu = new AlertDialog.Builder(this);
+	        	submenu.setTitle("Actions");
+	        	submenu.setItems(new String[] {getString(R.string.strMoveToTop), getString(R.string.strMoveToBottom), getString(R.string.strUp), getString(R.string.strDown), getString(R.string.strDelete), getString(R.string.strSave), getString(R.string.strCancel)}, new DialogInterface.OnClickListener() {
+	                public void onClick(DialogInterface dialog, int which) {
+	                	
+	                }
+	            });
+	        	return submenu.create();*/
+   			case VOLUME_DLG:
+   				LayoutInflater factory = LayoutInflater.from(this);
+   				View VolumeView = factory.inflate(R.layout.volume, null);
+   				dialog = new Dialog(this, R.style.Theme_VolumeDialog);
+   				dialog.setContentView(VolumeView);
+   				dialog.setCanceledOnTouchOutside(true);
+   				return dialog;
    			 default:
    				return null;
    			}
@@ -1273,11 +1319,16 @@ public class AndLess extends Activity implements Comparator<File> {
     	@Override
     	public boolean onOptionsItemSelected(MenuItem item) {
     		switch (item.getItemId()) {
-    	 	case R.id.Quit:	// should be About
+    	 	case R.id.About:	// should be About
     	 		showMsg(getString(R.string.strAbout));
             	return true;
     	 	case R.id.Setup:
-    	 		showDialog(SETTINGS_DLG);
+    	 		//showDialog(SETTINGS_DLG);
+    	 		Intent i = new Intent(this, Preferences.class);
+    	 		startActivity(i);
+    	     	return true;
+    	 	case R.id.Quit:
+    	 		ExitFromProgram();
     	     	return true;
     		}
     	    return false;
@@ -1504,7 +1555,7 @@ public class AndLess extends Activity implements Comparator<File> {
     			
     			int plen = cur_path.toString().length();
     			if(cur_path.toString().compareTo("/") != 0) plen++;
-        			
+    			directoryEntries.add(new IconifiedText("...",dir_icon));	
     			for(int i = 0; i < dirs + cues + flacs; i++) {
     				String s  = filez[i].toString().substring(plen);
     				if(i < dirs) directoryEntries.add(new IconifiedText(s,dir_icon));
@@ -1513,10 +1564,8 @@ public class AndLess extends Activity implements Comparator<File> {
     				files.add(filez[i].toString());			
     			}	
 
-				buttUp.setEnabled(cur_path.getParentFile()!= null);
     			IconifiedTextListAdapter ita = new IconifiedTextListAdapter(this);
     			ita.setListItems(directoryEntries);
-    			ita.setFontSize(prefs.fsize);
     			fileList.setAdapter(ita);
     			return true;
     			
@@ -1600,9 +1649,9 @@ public class AndLess extends Activity implements Comparator<File> {
     	        if(track_names.size() > 0) track_names.clear();
     	        if(start_times.size() > 0) start_times.clear();
     	        directoryEntries.clear();
-
+    	        Drawable dir_icon = getResources().getDrawable(R.drawable.folder);
     	        Drawable aud_icon = getResources().getDrawable(R.drawable.audio1);
-
+    	        directoryEntries.add(new IconifiedText("...",dir_icon));
         	    for(int i = 0; i < filez.size(); i++) {
         			String s = filez.get(i);
         			files.add(s);
@@ -1612,10 +1661,8 @@ public class AndLess extends Activity implements Comparator<File> {
         	       	
         	    }	
     	        
-        	    buttUp.setEnabled(true);
     	        IconifiedTextListAdapter ita = new IconifiedTextListAdapter(this);
     	        ita.setListItems(directoryEntries);
-    	        ita.setFontSize(prefs.fsize);
     	        fileList.setAdapter(ita);
     	    		
     	        return true;
@@ -1767,9 +1814,9 @@ public class AndLess extends Activity implements Comparator<File> {
     	        if(track_names.size() > 0) track_names.clear();
     	        if(start_times.size() > 0) start_times.clear();
     	        directoryEntries.clear();
-    	        	
+    	        Drawable dir_icon = getResources().getDrawable(R.drawable.folder);	
     	        Drawable aud_icon = getResources().getDrawable(R.drawable.audio1);
-    	        	
+    	        directoryEntries.add(new IconifiedText("...",dir_icon));	
     	        for(int i = 0; i < filez.size(); i++) {
     	        	files.add(filez.get(i));
     	        	track_names.add(namez.get(i));
@@ -1777,10 +1824,8 @@ public class AndLess extends Activity implements Comparator<File> {
     	        	directoryEntries.add(new IconifiedText(namez.get(i),aud_icon));
     	        }	
         			
-    			buttUp.setEnabled(true);
     			IconifiedTextListAdapter ita = new IconifiedTextListAdapter(this);
     			ita.setListItems(directoryEntries);
-    			ita.setFontSize(prefs.fsize);
     			fileList.setAdapter(ita);
     	
     	        return true;
@@ -1790,6 +1835,16 @@ public class AndLess extends Activity implements Comparator<File> {
     	    	return false;
     		}
     	}
-
+    	
+    	// parse milliseconds to time
+    	private String parseDur(int Dur) {
+    		String format = "mm:ss";
+    		if(Dur >= 3600*1000) {
+    			format = "hh:mm:ss";
+    		}
+        	SimpleDateFormat sdf = new SimpleDateFormat(format);
+    		Date toMin = new Date(Dur);
+        	return sdf.format(toMin);
+        }
 }
 

@@ -72,10 +72,12 @@
 <string name="strSaveBooks">Автосохранение закладок</string>
 <string name="strAbout">Android плеер andLess для звуковых файлов без потерь. Дата сборки Mar 24, 2010</string>
 <string name="strAbout1">О программе</string>
+<string name="strQuit">Выход</string>
 <string name="strHideExt">Не показывать расширений файлов</string>
 <string name="strErrPrefs">Не могу сохранить настройки</string>
 <string name="strErrSrvIf">Сервером возвращен нулевой binder-интерфейс</string>
 <string name="strErrSrvZero">Binder ушел при нажатии на кнопку</string>
 <string name="strBadBook">Ошибка в файле закладки</string>
 <string name="strCueTrack">Трек</string>
+<string name="strBSettings">Основные настройки</string>
 </resources>

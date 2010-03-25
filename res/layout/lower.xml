@@ -1,72 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-
 <LinearLayout 
 xmlns:android="http://schemas.android.com/apk/res/android"
 android:id="@+id/LinearLayout01" 
 android:orientation="vertical"
 android:layout_width="fill_parent" 
-android:layout_height="fill_parent">
-
-<ProgressBar android:id="@+id/PBar" 
-style="?android:attr/progressBarStyleHorizontal"
-android:layout_width="fill_parent"
-android:layout_height="8px">
-</ProgressBar>
+android:layout_height="fill_parent"
+android:background = "#FFFFFF">
 
 <ListView 
 android:orientation="horizontal"
-android:layout_height="wrap_content" 
+android:layout_height="0dip" 
 android:layout_width="fill_parent"
-android:id="@+id/FileList" android:longClickable="false" android:layout_weight="345">
+android:layout_weight="1"
+android:id="@+id/FileList">
 </ListView>
 
-
-<LinearLayout 
-android:orientation="horizontal"
-android:id="@+id/LinearLayout05" 
-android:layout_height="wrap_content" 
-android:layout_width="fill_parent" 
-android:layout_weight="1"
-android:background="#cccccc">
-
-<Button android:layout_width="wrap_content" android:layout_height="fill_parent" 
-android:id="@+id/ButtonQuit" android:background="@drawable/btn_quit" android:layout_weight="20">
-</Button>
-
-<Button android:layout_width="wrap_content" 
-android:layout_height="wrap_content" 
-android:id="@+id/ButtonVMinus" android:background="@drawable/vol_minus" android:layout_weight="1">
-</Button>
-
-<Button 
-android:layout_width="wrap_content" 
-android:layout_height="wrap_content" 
-android:id="@+id/ButtonVPlus" android:background="@drawable/vol_plus" android:layout_weight="1">
-</Button>
-
-<Button android:layout_width="wrap_content" 
-android:layout_height="wrap_content" 
-android:id="@+id/ButtonPrev" android:background="@drawable/go_prev_32" android:layout_weight="1">
-</Button>
-
-<Button android:layout_width="wrap_content" 
-android:layout_height="wrap_content" 
-android:id="@+id/ButtonNext" android:background="@drawable/go_next_32" android:layout_weight="1">
-</Button>
-
-<Button android:layout_width="wrap_content" 
-android:layout_height="wrap_content" 
-android:id="@+id/ButtonPause" android:background="@drawable/img_pause" android:layout_weight="1">
-</Button>
-
-<Button 
-android:layout_width="wrap_content" 
-android:layout_height="wrap_content" 
-android:id="@+id/ButtonUp" android:background="@drawable/go_up_32" android:layout_weight="1">
-</Button>
-
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="vertical"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:gravity="center"
+	    android:background="@drawable/bg"
+	    >
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:gravity="center"
+	    >
+	<Button
+		android:id ="@+id/ButtonPrev"
+		android:background="@drawable/s_prev"
+		android:layout_height = "wrap_content"
+		android:layout_width = "wrap_content"
+		android:layout_marginTop = "3dip"
+		android:layout_marginLeft = "5dip"
+		android:layout_marginRight="5dip"/> 
+	<Button
+		android:id ="@+id/ButtonPause"
+		android:background="@drawable/s_play"
+		android:layout_height = "wrap_content"
+		android:layout_width = "wrap_content"
+		android:layout_marginTop = "3dip"
+		android:layout_marginLeft = "5dip"
+		android:layout_marginRight="5dip"/>
+	<Button
+		android:id = "@+id/ButtonNext"
+		android:background="@drawable/s_next"
+		android:layout_height = "wrap_content"
+		android:layout_width = "wrap_content"
+		android:layout_marginTop = "3dip"
+		android:layout_marginLeft = "5dip"
+		android:layout_marginRight="5dip"/>
+	<Button
+		android:id = "@+id/ButtonVolume"
+		android:background="@drawable/volume"
+		android:layout_height = "wrap_content"
+		android:layout_width = "wrap_content"
+		android:layout_marginTop = "3dip"
+		android:layout_marginLeft = "5dip"
+		android:layout_marginRight="5dip"/>
+	</LinearLayout>
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:gravity="center"
+	    >
+	<LinearLayout
+	    	android:layout_height="wrap_content"
+	    	android:layout_width="fill_parent"
+	    	android:layout_gravity="top"
+	    	android:gravity="center"
+	    	android:orientation="horizontal">
+	    <TextView
+	    	android:id="@+id/nowTime"
+	    	android:layout_height = "wrap_content"
+	    	android:layout_width ="wrap_content"
+	    	android:layout_gravity="center"
+	    	android:textSize="12dip"
+	    	android:textStyle="bold"
+	    	android:paddingLeft = "7dip"
+	    	android:textColor = "#3c3d3d"
+	    	android:paddingBottom = "2dip"
+	    	android:text = "00:00"/>
+	    <SeekBar
+	    	android:id="@+id/PBar"
+	    	android:layout_gravity="bottom"
+	    	android:progressDrawable ="@drawable/seekbar"
+	    	android:thumb="@drawable/slider"
+	        android:layout_width="0dip"
+	        android:layout_weight = "1"
+	        android:layout_height="wrap_content"
+	        android:maxHeight = "5dip"
+	        android:max = "100"
+	        android:paddingLeft = "10dip"
+	        android:paddingRight = "10dip"
+	        android:progress="0"
+	        android:secondaryProgress="0" />
+	    <TextView
+	    	android:id="@+id/allTime"
+	    	android:layout_height = "wrap_content"
+	    	android:layout_width ="wrap_content"
+	    	android:layout_gravity="center"
+	    	android:textSize="12dip"
+	    	android:textStyle="bold"
+	    	android:paddingRight = "7dip"
+	    	android:paddingBottom = "2dip"
+	    	android:textColor = "#3c3d3d"
+	    	android:text = "00:00"/> 
+	    </LinearLayout>
+	</LinearLayout>
 </LinearLayout>
-
 
 </LinearLayout>
