@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.avs234.R;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +16,11 @@ import android.widget.TextView;
 public class IconifiedTextListAdapter extends BaseAdapter {
 	
 		LayoutInflater factory; 
-
+		View newView;
+		
+		TextView txtView;
+		ImageView imgView;
+		
         /** Remember our context so we can use it when constructing views. */
         private Context mContext;
 
@@ -24,6 +29,7 @@ public class IconifiedTextListAdapter extends BaseAdapter {
         public IconifiedTextListAdapter(Context context) {
                 mContext = context;
                 factory = LayoutInflater.from(context);
+                
         }
 
         public void addItem(IconifiedText it) { mItems.add(it); }
@@ -49,15 +55,16 @@ public class IconifiedTextListAdapter extends BaseAdapter {
         /** @param convertView The old view to overwrite, if one is passed
          * @returns a IconifiedTextView that holds wraps around an IconifiedText */
         public View getView(int position, View convertView, ViewGroup parent) {
-        	
-        	View newView = factory.inflate(R.layout.row, null);
-                
-            TextView txtView = (TextView)newView.findViewById(R.id.title);
+        	if(convertView == null) {
+        		newView = factory.inflate(R.layout.row, null);
+        	} else {
+        		newView = convertView;
+        	}
+            txtView = (TextView)newView.findViewById(R.id.title);
             txtView.setText(mItems.get(position).getText());
-                	
-            ImageView imgView = (ImageView)newView.findViewById(R.id.icon);
+            imgView = (ImageView)newView.findViewById(R.id.icon);
             imgView.setImageDrawable(mItems.get(position).getIcon());
-                
+            
            return newView;
         }
 }
