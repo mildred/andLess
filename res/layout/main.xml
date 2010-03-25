@@ -30,6 +30,22 @@ android:id="@+id/FileList">
 	    android:gravity="center"
 	    >
 	<Button
+		android:id = "@+id/ButtonVolume"
+		android:background="@drawable/volume_button_off"
+		android:layout_height = "wrap_content"
+		android:layout_width = "wrap_content"
+		android:visibility="gone"
+		android:layout_marginTop = "3dip"
+		android:layout_marginLeft = "5dip"
+		android:layout_marginRight="5dip"/>
+	  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="horizontal"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_weight = "1"
+	    android:gravity="center"
+	    >
+	<Button
 		android:id ="@+id/ButtonPrev"
 		android:background="@drawable/s_prev"
 		android:layout_height = "wrap_content"
@@ -53,14 +69,7 @@ android:id="@+id/FileList">
 		android:layout_marginTop = "3dip"
 		android:layout_marginLeft = "5dip"
 		android:layout_marginRight="5dip"/>
-	<Button
-		android:id = "@+id/ButtonVolume"
-		android:background="@drawable/volume"
-		android:layout_height = "wrap_content"
-		android:layout_width = "wrap_content"
-		android:layout_marginTop = "3dip"
-		android:layout_marginLeft = "5dip"
-		android:layout_marginRight="5dip"/>
+	</LinearLayout>
 	</LinearLayout>
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:orientation="horizontal"

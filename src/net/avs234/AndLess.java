@@ -855,8 +855,10 @@ public class AndLess extends Activity implements Comparator<File> {
         	Log.i("AndLess.java", "driver_mode:"+d_m+" book_mode:"+b_m);
         	if(d_m) {
         		prefs.driver_mode = AndLessSrv.MODE_DIRECT;
+        		ButtonVolume.setVisibility(View.VISIBLE);
         	} else {
         		prefs.driver_mode = AndLessSrv.MODE_LIBMEDIA;
+        		ButtonVolume.setVisibility(View.GONE);
         	}
 			if(b_m) {
 				prefs.savebooks = true;
@@ -1837,7 +1839,7 @@ public class AndLess extends Activity implements Comparator<File> {
     	}
     	
     	// parse milliseconds to time
-    	private String parseDur(int Dur) {
+    	private String parseDur(long Dur) {
     		String format = "mm:ss";
     		if(Dur >= 3600*1000) {
     			format = "hh:mm:ss";
