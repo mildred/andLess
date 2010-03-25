@@ -339,7 +339,6 @@ public class AndLess extends Activity implements Comparator<File> {
         };
         View.OnClickListener onButtVPlus = new OnClickListener() {
         	public void onClick(View v) {
-        		Log.i("AndLess.java", "onButtVMinus");
         		v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),  R.anim.blink));
         		if(samsung) {
         			try {
@@ -354,7 +353,6 @@ public class AndLess extends Activity implements Comparator<File> {
         };
         View.OnClickListener onButtVMinus = new OnClickListener() {
         	public void onClick(View v) {
-        		Log.i("AndLess.java", "onButtVMinus");
         		v.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),  R.anim.blink));
         		if(samsung) {
         			try {
@@ -756,7 +754,9 @@ public class AndLess extends Activity implements Comparator<File> {
 					   				}
 								//	pBar.setProgress(srv.get_cur_seconds() - AndLessSrv.curTrackStart);
 					   				pBar.setProgress(srv.get_cur_seconds() - srv.get_cur_track_start());
-					   				nowTime.setText(parseDur(srv.get_cur_seconds()*1000));
+					   				String sTime = (srv.get_cur_seconds() < 3600) ? String.format("%d:%02d", srv.get_cur_seconds()/60, srv.get_cur_seconds() % 60) 
+											:	String.format("%d:%02d:%02d", srv.get_cur_seconds()/3600, (srv.get_cur_seconds() % 3600)/60, srv.get_cur_seconds() % 60);
+					   				nowTime.setText(sTime);
 								} catch (Exception e) { 
 									log_err("exception 1 in progress update handler: " + e.toString()); 
 								}
@@ -778,9 +778,12 @@ public class AndLess extends Activity implements Comparator<File> {
 								}
 								curWindowTitle = (track_time < 3600) ? String.format("[%d:%02d] %s", track_time/60, track_time % 60, track_name) 
 									:	String.format("[%d:%02d:%02d] %s", track_time/3600, (track_time % 3600)/60, track_time % 60, track_name);
+								
 								getWindow().setTitle(curWindowTitle);
 								pBar.setMax(track_time);
-								allTime.setText(parseDur(track_time*1000));
+								String sTime = (track_time < 3600) ? String.format("%d:%02d", track_time/60, track_time % 60) 
+										:	String.format("%d:%02d:%02d", track_time/3600, (track_time % 3600)/60, track_time % 60);
+								allTime.setText(sTime);
 							} catch (Exception e) { 
 								log_err("exception 2 in progress update handler: " + e.toString()); 
 							}
@@ -852,7 +855,6 @@ public class AndLess extends Activity implements Comparator<File> {
         	boolean s_m = settings.getBoolean("shuffle_mode", false);
         	boolean d_m = settings.getBoolean("driver_mode", false);
         	boolean b_m = settings.getBoolean("book_mode", false);
-        	Log.i("AndLess.java", "driver_mode:"+d_m+" book_mode:"+b_m);
         	if(d_m) {
         		prefs.driver_mode = AndLessSrv.MODE_DIRECT;
         		ButtonVolume.setVisibility(View.VISIBLE);
@@ -1837,16 +1839,6 @@ public class AndLess extends Activity implements Comparator<File> {
     	    	return false;
     		}
     	}
-    	
-    	// parse milliseconds to time
-    	private String parseDur(long Dur) {
-    		String format = "mm:ss";
-    		if(Dur >= 3600*1000) {
-    			format = "hh:mm:ss";
-    		}
-        	SimpleDateFormat sdf = new SimpleDateFormat(format);
-    		Date toMin = new Date(Dur);
-        	return sdf.format(toMin);
-        }
+
 }
 
