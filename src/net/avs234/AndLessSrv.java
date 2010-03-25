@@ -90,7 +90,7 @@ public class AndLessSrv extends Service {
 	// Audio context descriptor returned by audioInit(). 
 	// Actually, it's a pointer to struct msm_ctx, see native code.
 	// Used in all subsequent calls of native functions.
-	private int ctx = 0;
+	private static int ctx = 0;
 	
 	public static final int MODE_NONE = 0;
 	public static final int MODE_DIRECT = 1; 
@@ -128,7 +128,7 @@ public class AndLessSrv extends Service {
 	
 	// Callback used to send new track name or error status to the interface thread.
 	
-	private final RemoteCallbackList<IAndLessSrvCallback> cBacks = new RemoteCallbackList<IAndLessSrvCallback>();
+	private static final RemoteCallbackList<IAndLessSrvCallback> cBacks = new RemoteCallbackList<IAndLessSrvCallback>();
 	
 	private void informTrack(String s, boolean error) {
 		final int k = cBacks.beginBroadcast();
@@ -263,17 +263,16 @@ public class AndLessSrv extends Service {
 		private int			cur_mode;		// MODE_NONE for mp3, or one of driver_mode
 		private int			driver_mode;	// driver mode in client preferences
 		
-		playlist() {
+		public boolean init_playlist(String path, int items) {
+			if(items <= 0) return false;
+
 			dir = null;  	files = null;
 			cur_pos = -1;	th = null;
 			paused = false;	running = false; 
 			times = null;	names = null;
 			cup = null;		cur_mode = MODE_NONE;
 			driver_mode = MODE_LIBMEDIA;
-		}
-					
-		public boolean init_playlist(String path, int items) {
-			if(items <= 0) return false;
+
 			if(path != null) dir = new String(path);
 			try {
 				files = new String[items];
@@ -613,37 +612,37 @@ public class AndLessSrv extends Service {
 		}
 	}
 	
-	private playlist plist = null;
+	private static playlist plist = null;
 
 	//////////////////////////////////////////////////
 	//// The interface we expose to clients.  It's returned to them when the connection is established. 
 
-	private final IAndLessSrv.Stub binder = new IAndLessSrv.Stub() {
+	private static final IAndLessSrv.Stub binder = new IAndLessSrv.Stub() {
 		public boolean init_playlist(String path, int nitems) {
-			if(plist != null) plist.stop(); plist = null;
-			plist = new playlist(); return plist.init_playlist(path,nitems); 
+			plist.stop(); //	plist = null; 		plist = new playlist(); 
+			return plist.init_playlist(path,nitems); 
 		}
 		public boolean  add_to_playlist(String src, String name, int start_time, int pos) { return plist.add_to_playlist(src,name,start_time,pos);}
-		public boolean	play (int n, int start) 	{ return (plist == null) ? false : plist.play(n,start); }
-		public boolean	play_next()  	{ return (plist == null) ? false : plist.play_next(); }
-		public boolean	play_prev()  	{ return (plist == null) ? false : plist.play_prev(); }
-		public boolean	pause() 		{ return (plist == null) ? false : plist.pause(); }
-		public boolean	resume() 		{ return (plist == null) ? false : plist.resume(); }
-		public boolean	inc_vol() 		{ return (plist == null) ? false : plist.inc_vol(); }
-		public boolean	dec_vol() 		{ return (plist == null) ? false : plist.dec_vol(); }
-		public boolean	shutdown() 		{ if(plist != null) plist.stop();  audioExit(ctx); ctx = 0; return true; }
-		public boolean	is_running()	{ return (plist == null) ? false : plist.running; }
+		public boolean	play (int n, int start) 	{ return plist.play(n,start); }
+		public boolean	play_next()  	{ return plist.play_next(); }
+		public boolean	play_prev()  	{ return plist.play_prev(); }
+		public boolean	pause() 		{ return plist.pause(); }
+		public boolean	resume() 		{ return plist.resume(); }
+		public boolean	inc_vol() 		{ return plist.inc_vol(); }
+		public boolean	dec_vol() 		{ return plist.dec_vol(); }
+		public boolean	shutdown() 		{ plist.stop();  audioExit(ctx); ctx = 0; return true; }
+		public boolean	is_running()	{ return plist.running; }
 		public boolean  initialized() 	{ return ctx != 0; }	// why this function? 
-		public boolean	is_paused()		{ return (plist == null) ? false : plist.paused; }
-		public String	get_cur_dir()	{ return (plist == null) ? null  : plist.dir; }
-		public int		get_cur_pos()	{ return (plist == null) ? -1 : plist.cur_pos; }
-		public int		get_cur_seconds()		{ return (plist == null) ? 0 : plist.getCurPosition(); }
-		public int		get_track_duration()		{ return (plist == null) ? 0 : plist.getDuration(); }
-		public int		get_cur_track_start() {return curTrackStart; }
-		public int		get_cur_track_len() {return curTrackLen; }
+		public boolean	is_paused()		{ return plist.paused; }
+		public String	get_cur_dir()	{ return plist.dir; }
+		public int		get_cur_pos()	{ return plist.cur_pos; }
+		public int		get_cur_seconds()		{ return plist.getCurPosition(); }
+		public int		get_track_duration()		{ return plist.getDuration(); }
+		public int		get_cur_track_start() { return curTrackStart; }
+		public int		get_cur_track_len() { return curTrackLen; }
 		public String  	get_cur_track_source()	{ try { return plist.files[plist.cur_pos]; } catch(Exception e) {return null;} }
 		public String  	get_cur_track_name()	{ try { return plist.names[plist.cur_pos]; } catch(Exception e) {return null;} }
-		public void		set_driver_mode(int m) 	{ if(plist == null) return; plist.driver_mode = m; }
+		public void		set_driver_mode(int m) 	{ plist.driver_mode = m; }
 		public void 	registerCallback(IAndLessSrvCallback cb) { if(cb != null) cBacks.register(cb); };
 		public void 	unregisterCallback(IAndLessSrvCallback cb) { if(cb != null) cBacks.unregister(cb); };
 	    public int []	get_cue_from_flac(String file) {return  extractFlacCUE(file); };
@@ -669,6 +668,7 @@ public class AndLessSrv extends Service {
 	        	wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, this.getClass().getName());
 	        	wakeLock.setReferenceCounted(false);
 	        }
+	        plist = new AndLessSrv.playlist();
 	        if(nm == null) nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 	        Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
 	}
