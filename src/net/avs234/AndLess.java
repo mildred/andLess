@@ -1022,16 +1022,6 @@ public class AndLess extends Activity implements Comparator<File> {
       	static final int EDIT_PLAYLIST_DLG = 2;
       	static final int VOLUME_DLG = 3;
       	
-      	private RadioGroup rt, rf;
-      	private CheckBox chk, chkm, chkb;
-      	
-
-		View.OnClickListener oncl = new OnClickListener() {
-    		public void onClick(View v) {  
-    		
-    		}
-    	};
-		
     	private boolean item_deleted = false;
     	private int track_longpressed;
     	private String curRowIs;
@@ -1054,14 +1044,23 @@ public class AndLess extends Activity implements Comparator<File> {
     			submenu.setTitle(directoryEntries.get(track_longpressed).getText().toString());
     			break;*/
     		   	case ADD_PLAYLIST_DLG:
-    		   		thisDialog = dialog;
-       				dialog.setTitle(getString(R.string.strAddPlist));
-       				((EditText) dialog.findViewById(R.id.EditPlaylistPath)).setText(prefs.plist_path);
-       				((EditText) dialog.findViewById(R.id.EditPlaylistName)).setText(prefs.plist_name);
-       				chb = (CheckBox) dialog.findViewById(R.id.CheckRecursive);
+    		   		AlertDialog aDialog = (AlertDialog)dialog;
+    		   		aDialog.setTitle(getString(R.string.strAddPlist));
+       				((EditText) aDialog.findViewById(R.id.EditPlaylistPath)).setText(prefs.plist_path);
+       				((EditText) aDialog.findViewById(R.id.EditPlaylistName)).setText(prefs.plist_name);
+       				TextView chbt = (TextView) aDialog.findViewById(R.id.CheckBoxText);
+       				chbt.setEnabled(false);
+       				chb = (CheckBox) aDialog.findViewById(R.id.CheckRecursive);
        				chb.setChecked(false);
+       				
        				File f = new File(files.get(cur_longpressed));
-       				if(!f.isDirectory()) chb.setEnabled(false);  else chb.setEnabled(true);
+       				if(!f.isDirectory()) {
+       					chb.setEnabled(false);
+       					chbt.setEnabled(false);
+       				} else {
+       					chb.setEnabled(true);
+       					chbt.setEnabled(true);
+       				}
        				break;
     		   	case VOLUME_DLG:
     		   		buttVMinus = (Button) dialog.findViewById(R.id.ButtonVMinus);
@@ -1076,129 +1075,86 @@ public class AndLess extends Activity implements Comparator<File> {
     	
     	protected Dialog onCreateDialog(int id) {
 			Dialog dialog;
+			LayoutInflater factory = LayoutInflater.from(this);
 			switch(id) {
-   			 case SETTINGS_DLG:
-   				
-   				dialog = new Dialog(this);
-    			dialog.setContentView(R.layout.settings);
-   				dialog.setTitle(R.string.strSettings);
-    		
-   				chk = (CheckBox) dialog.findViewById(R.id.CheckShuffle);
-   				chkm = (CheckBox) dialog.findViewById(R.id.CheckMode);
-   				chkb = (CheckBox) dialog.findViewById(R.id.BookMode);
-   				
-
-   				if(prefs.shuffle) chk.setChecked(true); else chk.setChecked(false); 
-   				if(prefs.driver_mode == AndLessSrv.MODE_DIRECT) chkm.setChecked(true); else chkm.setChecked(false);
-   				if(prefs.savebooks == true) chkb.setChecked(true); else chkb.setChecked(false);
-   				
-    		
-   				dialog.setOnDismissListener(
-   						new DialogInterface.OnDismissListener() {
-   							public void onDismiss(DialogInterface df) { 
-    					
-   								if(chk.isChecked() != prefs.shuffle) playlist_changed = true;
-   			
-   								if(chk.isChecked()) prefs.shuffle = true;
-   								else prefs.shuffle = false;
-
-   								if(chkm.isChecked()) prefs.driver_mode = AndLessSrv.MODE_DIRECT;
-   								else  prefs.driver_mode = AndLessSrv.MODE_LIBMEDIA;
-
-   								if(chkb.isChecked()) prefs.savebooks = true;
-   								else  prefs.savebooks = false;
-   								
-   								setTheme(android.R.style.Theme_Light);
-    					
-   								setContentView(R.layout.main);
-   								
-   								setContent(); 
-
-   								fileList.setBackgroundResource(android.R.color.background_light); 
-
-   								if(!setAdapter(cur_path)) log_err("this cannot happen!");
-   							}
-   						}		
-   				); 
-   				return dialog;
-   			 
+			
    			 case ADD_PLAYLIST_DLG:
-    				dialog = new Dialog(this);
-       				dialog.setContentView(R.layout.add_plist);
-       				
-       				// Save
-       				((Button) dialog.findViewById(R.id.ButtonSave)).setOnClickListener(new OnClickListener() {
-       		    		public void onClick(View v) {
-       		    			// save and reload playlist
-       		    			String path = ((EditText) thisDialog.findViewById(R.id.EditPlaylistPath)).getText().toString();
-       		    			String name = ((EditText) thisDialog.findViewById(R.id.EditPlaylistName)).getText().toString();
-       		    			       		    			       		    			
-       		    			String spath = new String(path);
-       		    			String sname = new String(name);
-       		    			if(!name.endsWith(plist_ext)) name += plist_ext;
-       		    			if(!path.endsWith("/")) path += "/";
-       		    			path = path + name;
-       		    			File plist_file = new File(path);
-       		    			File f = new File(files.get(cur_longpressed));
-       		    			if(!f.exists()) {
-       		    				Toast.makeText(getApplicationContext(), R.string.strInternalError, Toast.LENGTH_SHORT).show();
-       		    				return;
-       		    			}
-       		    			ArrayList<String> filez = new ArrayList<String>();
-       		    			if(f.isDirectory()) {
-       		    				if(chb.isChecked()) {
-       		    					filez = recurseDir(f);
-       		    					if(filez.size() < 1) {
-       		    						Toast.makeText(getApplicationContext(), R.string.strNoFiles, Toast.LENGTH_SHORT).show();
-       		    						return;
-       		    					}
-       		    				} else {
-       		    					parsed_dir d = parseDir(f);
-       		    					if(d == null || d.flacs == 0) {
-       		    						Toast.makeText(getApplicationContext(), R.string.strNoFiles, Toast.LENGTH_SHORT).show();
-       		    						return;
-       		    					}
-       		    					for(int i = d.dirs + d.cues; i < d.filez.length; i++) filez.add(d.filez[i].toString());
-       		    				}
-       		    			} else filez.add(files.get(cur_longpressed).toString());
-       		    			
-       		    			String cstats = new String("createNewFile()");
-       		    			int i;
-       		    			try {
-       		    			    boolean append = true;
-       		    				if(!plist_file.exists()) {
-       		    					plist_file.createNewFile(); append = false;
-       		    				}
-       		    				cstats = new String("FileWiter()");
-       		    				FileWriter fw = new FileWriter(plist_file, append);
-       		    				cstats = new String("BufferedWriter()");
-       		    				BufferedWriter writer = new BufferedWriter(fw, 8192);
-       		    				cstats = new String("write()");
-       		    				for(i = 0; i < filez.size(); i++) writer.write(filez.get(i) + "\n");
-       		    				cstats = new String("close()");
-       		    				writer.close();
-           		    			prefs.plist_path = new String(spath);
-           		    			prefs.plist_name = new String(sname);
-       		    			} catch (Exception e) {
-       		    				//Toast.makeText(getApplicationContext(), R.string.strIOError, Toast.LENGTH_SHORT).show();
-       		    				showMsg( getString(R.string.strIOError) + " in " + cstats + " while saving playlist to " + plist_file.toString());
-       		    				return;
-       		    			}
-       		    			dismissDialog(ADD_PLAYLIST_DLG);
-       		    			thisDialog = null;
-       		    		}
-       		    	});
-       				
-       				// Cancel
-       				((Button) dialog.findViewById(R.id.ButtonCancel)).setOnClickListener(new OnClickListener() {
-       		    		public void onClick(View v) {
-       		    			dismissDialog(ADD_PLAYLIST_DLG);
-       		    			thisDialog = null;
-       		    		}
-       		    	});
-       				
-       				return dialog;
-   			 
+   				final View newView = factory.inflate(R.layout.add_plist, null); 
+   				AlertDialog.Builder add_playlist_dlg = new AlertDialog.Builder(this);
+   				add_playlist_dlg.setView(newView);
+   				add_playlist_dlg.setTitle(R.string.strAddPlist);
+   				add_playlist_dlg.setPositiveButton(R.string.strAdd, new DialogInterface.OnClickListener() {
+   			        public void onClick(DialogInterface dialog, int whichButton) {
+   			        	Log.i("andless", "-1");
+   			      // save and reload playlist
+   		    			String path = ((EditText) newView.findViewById(R.id.EditPlaylistPath)).getText().toString();
+   		    			String name = ((EditText) newView.findViewById(R.id.EditPlaylistName)).getText().toString();
+   		    			Log.i("andless", "0");       		    			       		    			
+   		    			String spath = new String(path);
+   		    			String sname = new String(name);
+   		    			if(!name.endsWith(plist_ext)) name += plist_ext;
+   		    			if(!path.endsWith("/")) path += "/";
+   		    			path = path + name;
+   		    			File plist_file = new File(path);
+   		    			File f = new File(files.get(cur_longpressed));
+   		    			if(!f.exists()) {
+   		    				Toast.makeText(getApplicationContext(), R.string.strInternalError, Toast.LENGTH_SHORT).show();
+   		    				return;
+   		    			}
+   		    			ArrayList<String> filez = new ArrayList<String>();
+   		    			if(f.isDirectory()) {
+   		    				if(chb.isChecked()) {
+   		    					filez = recurseDir(f);
+   		    					if(filez.size() < 1) {
+   		    						Toast.makeText(getApplicationContext(), R.string.strNoFiles, Toast.LENGTH_SHORT).show();
+   		    						return;
+   		    					}
+   		    				} else {
+   		    					parsed_dir d = parseDir(f);
+   		    					if(d == null || d.flacs == 0) {
+   		    						Toast.makeText(getApplicationContext(), R.string.strNoFiles, Toast.LENGTH_SHORT).show();
+   		    						return;
+   		    					}
+   		    					for(int i = d.dirs + d.cues; i < d.filez.length; i++) filez.add(d.filez[i].toString());
+   		    				}
+   		    			} else filez.add(files.get(cur_longpressed).toString());
+   		    			Log.i("andless", "1");
+   		    			String cstats = new String("createNewFile()");
+   		    			int i;
+   		    			try {
+   		    			    boolean append = true;
+   		    				if(!plist_file.exists()) {
+   		    					plist_file.createNewFile(); append = false;
+   		    				}
+   		    				cstats = new String("FileWiter()");
+   		    				FileWriter fw = new FileWriter(plist_file, append);
+   		    				cstats = new String("BufferedWriter()");
+   		    				BufferedWriter writer = new BufferedWriter(fw, 8192);
+   		    				cstats = new String("write()");
+   		    				for(i = 0; i < filez.size(); i++) writer.write(filez.get(i) + "\n");
+   		    				cstats = new String("close()");
+   		    				writer.close();
+       		    			prefs.plist_path = new String(spath);
+       		    			prefs.plist_name = new String(sname);
+   		    			} catch (Exception e) {
+   		    				//Toast.makeText(getApplicationContext(), R.string.strIOError, Toast.LENGTH_SHORT).show();
+   		    				showMsg( getString(R.string.strIOError) + " in " + cstats + " while saving playlist to " + plist_file.toString());
+   		    				return;
+   		    			}
+   		    			Log.i("andless", "2");
+   		    			dismissDialog(ADD_PLAYLIST_DLG);
+   		    			Log.i("andless", "3");
+   		    			thisDialog = null;
+   			        	}
+   			        });
+   				add_playlist_dlg.setNegativeButton(R.string.strCancel, new DialogInterface.OnClickListener() {
+   			        public void onClick(DialogInterface dialog, int whichButton) {
+   			        	dismissDialog(ADD_PLAYLIST_DLG);
+   		    			thisDialog = null;
+   			        	}
+   			        });
+   				return add_playlist_dlg.create();	
+       			
    			 case EDIT_PLAYLIST_DLG:
    				
    				dialog = new Dialog(this);
@@ -1308,7 +1264,6 @@ public class AndLess extends Activity implements Comparator<File> {
 	            });
 	        	return submenu.create();*/
    			case VOLUME_DLG:
-   				LayoutInflater factory = LayoutInflater.from(this);
    				View VolumeView = factory.inflate(R.layout.volume, null);
    				dialog = new Dialog(this, R.style.Theme_VolumeDialog);
    				dialog.setContentView(VolumeView);
@@ -1323,9 +1278,6 @@ public class AndLess extends Activity implements Comparator<File> {
     	@Override
     	public boolean onOptionsItemSelected(MenuItem item) {
     		switch (item.getItemId()) {
-    	 	case R.id.About:	// should be About
-    	 		showMsg(getString(R.string.strAbout));
-            	return true;
     	 	case R.id.Setup:
     	 		//showDialog(SETTINGS_DLG);
     	 		Intent i = new Intent(this, Preferences.class);

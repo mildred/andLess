@@ -136,7 +136,7 @@ public class AndLessSrv extends Service {
 	         try { 
 	            	if(!error) {
 	            		cBacks.getBroadcastItem(i).playItemChanged(false,s);
-						AndLessSrv.this.notify(R.drawable.new_icon/*R.drawable.playbackstart*/,s);
+						AndLessSrv.this.notify(R.drawable.play_on/*R.drawable.playbackstart*/,s);
 	            	} else {
 	            		cBacks.getBroadcastItem(i).playItemChanged(true,getString(R.string.strStopped));
 	            		if(s.compareTo(getString(R.string.strStopped))!= 0) cBacks.getBroadcastItem(i).errorReported(s);

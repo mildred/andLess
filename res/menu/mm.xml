@@ -3,6 +3,5 @@
   xmlns:android="http://schemas.android.com/apk/res/android">
 
 <item android:title="@string/strSettings" android:id="@+id/Setup" android:icon="@android:drawable/ic_menu_preferences"></item>
-<item android:id="@+id/About" android:title="@string/strAbout1" android:icon="@android:drawable/ic_menu_help"></item>
 <item android:id="@+id/Quit" android:title="@string/strQuit" android:icon="@android:drawable/ic_menu_close_clear_cancel"></item>
 </menu>

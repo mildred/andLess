@@ -35,7 +35,7 @@ android:id="@+id/FileList">
 		android:layout_height = "wrap_content"
 		android:layout_width = "wrap_content"
 		android:visibility="gone"
-		android:layout_marginTop = "3dip"
+		android:layout_marginTop = "4dip"
 		android:layout_marginLeft = "5dip"
 		android:layout_marginRight="5dip"/>
 	  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -50,7 +50,7 @@ android:id="@+id/FileList">
 		android:background="@drawable/s_prev"
 		android:layout_height = "wrap_content"
 		android:layout_width = "wrap_content"
-		android:layout_marginTop = "3dip"
+		android:layout_marginTop = "4dip"
 		android:layout_marginLeft = "5dip"
 		android:layout_marginRight="5dip"/> 
 	<Button
@@ -58,7 +58,7 @@ android:id="@+id/FileList">
 		android:background="@drawable/s_play"
 		android:layout_height = "wrap_content"
 		android:layout_width = "wrap_content"
-		android:layout_marginTop = "3dip"
+		android:layout_marginTop = "4dip"
 		android:layout_marginLeft = "5dip"
 		android:layout_marginRight="5dip"/>
 	<Button
@@ -66,7 +66,7 @@ android:id="@+id/FileList">
 		android:background="@drawable/s_next"
 		android:layout_height = "wrap_content"
 		android:layout_width = "wrap_content"
-		android:layout_marginTop = "3dip"
+		android:layout_marginTop = "4dip"
 		android:layout_marginLeft = "5dip"
 		android:layout_marginRight="5dip"/>
 	</LinearLayout>

@@ -1,24 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
 <LinearLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_height="wrap_content" android:layout_width="fill_parent" 
-  android:orientation="vertical">
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <TextView 
+        android:text = "@string/strPlaylistName"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginLeft="20dip"
+        android:layout_marginRight="20dip"
+        android:gravity="left"
+        android:textAppearance="?android:attr/textAppearanceMediumInverse" />
+            
+    <EditText
+        android:id="@+id/EditPlaylistName"
+        android:maxLines = "1"
+        android:singleLine = "true"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_marginLeft="20dip"
+        android:layout_marginRight="20dip"
+        android:scrollHorizontally="true"
+        android:autoText="false"
+        android:capitalize="none"
+        android:gravity="fill_horizontal"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-<TextView android:id="@+id/TextView01" 
-android:layout_height="wrap_content" android:layout_width="fill_parent" android:textSize="24px" android:textStyle="bold" android:text="@string/strPlaylistName"></TextView>
-
-<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/EditPlaylistName"></EditText>
-
-<TextView android:id="@+id/TextView02"  
-android:layout_height="wrap_content" android:layout_width="fill_parent" android:textSize="24px" android:textStyle="bold" android:text="@string/strPlaylistPath"></TextView>
-
-<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/EditPlaylistPath"></EditText>
-
-
-<RelativeLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/RelativeLayout01">
-<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentRight="true" android:id="@+id/ButtonSave" android:text="@string/strAdd"></Button>
-<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/strCancel" 
-android:layout_toLeftOf="@id/ButtonSave" android:layout_alignTop="@id/ButtonSave" android:id="@+id/ButtonCancel"></Button>
-<CheckBox android:layout_alignTop="@id/ButtonSave" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/CheckRecursive" android:text="@string/strRecursive"></CheckBox>
-</RelativeLayout>
+    <TextView
+        android:text = "@string/strPlaylistPath"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginLeft="20dip"
+        android:layout_marginRight="20dip"
+        android:gravity="left"
+        android:textAppearance="?android:attr/textAppearanceMediumInverse" />
+            
+    <EditText
+        android:id="@+id/EditPlaylistPath"
+        android:maxLines = "1"
+        android:singleLine = "true"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_marginLeft="20dip"
+        android:layout_marginRight="20dip"
+        android:scrollHorizontally="true"
+        android:gravity="fill_horizontal"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+    <LinearLayout
+    	android:layout_width="fill_parent"
+    	android:layout_height="wrap_content"
+    	android:orientation="horizontal">
+    <CheckBox
+    	android:id="@+id/CheckRecursive"
+    	android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:layout_marginLeft="20dip"
+    	android:layout_marginRight="5dip"/>
+    <TextView
+    	android:id = "@+id/CheckBoxText"
+        android:text="@string/strRecursive"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:gravity="left"
+        android:textAppearance="?android:attr/textAppearanceMediumInverse" />
+    </LinearLayout>
 </LinearLayout>
+</ScrollView>
