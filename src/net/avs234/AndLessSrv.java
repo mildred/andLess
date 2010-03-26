@@ -400,7 +400,7 @@ public class AndLessSrv extends Service {
 				if(!wakeLock.isHeld()) wakeLock.acquire();
 				int k;
 				for(k = 1; running && cur_pos < files.length; cur_pos++) {
-					log_msg(Process.myTid() + ": trying " + files[cur_pos] + " @ time " + times[cur_pos] + " mode=" + driver_mode);
+					log_msg(Process.myTid() + ": trying " + files[cur_pos] + " @ time " + (times[cur_pos] + cur_start) +" mode=" + driver_mode);
 					try {
 						curTrackLen = 0;
 						curTrackStart = 0;
@@ -433,7 +433,7 @@ public class AndLessSrv extends Service {
 	              		} else if(files[cur_pos].endsWith(".m4a") || files[cur_pos].endsWith(".M4A")) {
 	              			if(initAudioMode(driver_mode)) k = alacPlay(ctx,files[cur_pos],times[cur_pos]+cur_start);
 	              			if(k == LIBLOSSLESS_ERR_FORMAT) {	// maybe it's not apple lossless
-	              				if(initAudioMode(MODE_NONE)) k = extPlay(files[cur_pos],cur_start);
+	              				if(initAudioMode(MODE_NONE)) k = extPlay(files[cur_pos],times[cur_pos]+cur_start);
 	              			}
 	              		} else if(files[cur_pos].endsWith(".wav") || files[cur_pos].endsWith(".WAV")) {
 							if(initAudioMode(driver_mode)) k = wavPlay(ctx,files[cur_pos],times[cur_pos]+cur_start);
@@ -643,7 +643,7 @@ public class AndLessSrv extends Service {
 		public String  	get_cur_track_source()	{ try { return plist.files[plist.cur_pos]; } catch(Exception e) {return null;} }
 		public String  	get_cur_track_name()	{ try { return plist.names[plist.cur_pos]; } catch(Exception e) {return null;} }
 		public void		set_driver_mode(int m) 	{ plist.driver_mode = m; }
-		public void 	registerCallback(IAndLessSrvCallback cb) { if(cb != null) cBacks.register(cb); };
+		public void 	registerCallback(IAndLessSrvCallback cb)   { if(cb != null) cBacks.register(cb); };
 		public void 	unregisterCallback(IAndLessSrvCallback cb) { if(cb != null) cBacks.unregister(cb); };
 	    public int []	get_cue_from_flac(String file) {return  extractFlacCUE(file); };
 	};
@@ -676,7 +676,7 @@ public class AndLessSrv extends Service {
 	@Override
 	public void onDestroy() {
 			log_msg("onDestroy()");
-			cBacks.kill();
+		//	cBacks.kill();
 			if(plist != null && plist.running) plist.stop();
 			if(ctx != 0) audioExit(ctx);
 			TelephonyManager tmgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);

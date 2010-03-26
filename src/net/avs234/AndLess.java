@@ -158,15 +158,17 @@ public class AndLess extends Activity implements Comparator<File> {
     					if(f.exists() && (f.isDirectory() || hasPlistExt(s) || hasCueExt(s))) {
     						if(setAdapter(f)) { 
     							log_msg("restored previous playlist");
-    							int i = srv.get_cur_pos();
+    							int i = srv.get_cur_pos() + 1;
     							if(i >= 0 && first_file_pos + i < directoryEntries.size()) {
     								fileList.setSelection(first_file_pos+i);
     							}
     							if(srv.is_paused()) { 
     								cBack.playItemChanged(true,getString(R.string.strPaused));
     								buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_play));
-    							} else if(srv.is_running()) cBack.playItemChanged(false,directoryEntries.get(first_file_pos+i).getText());
-    							  else cBack.playItemChanged(true,getString(R.string.strStopped));
+    							} else if(srv.is_running()) {
+    								cBack.playItemChanged(false,directoryEntries.get(first_file_pos+i).getText());
+    								buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_pause));
+    							} else cBack.playItemChanged(true,getString(R.string.strStopped));
     						} else s = null;
     					}
     				} 	
@@ -180,7 +182,7 @@ public class AndLess extends Activity implements Comparator<File> {
     		            	if(!setAdapter(new File("/"))) errExit(R.string.strCantSetup);
     		            }
     		            fileList.setSelection(0);
-    		            if(prefs.last_played_file != null && (new File(prefs.last_played_file)).exists()) {
+    		            if(prefs.last_played_file != null && (new File(prefs.last_played_file)).exists() && !srv.is_running()) {
         					log_msg("bookmarked, starting from paused state");
     		            	cBack.playItemChanged(true,getString(R.string.strPaused));
         					pause_on_start = true;
@@ -240,10 +242,7 @@ public class AndLess extends Activity implements Comparator<File> {
     		protected void onPostExecute(Integer result) {
     			switch(result) {
     				case change_to_pause_btn:
-    					if(pause_on_start) {
-    						selItem.onItemClick(null, null, 0, 0); // dirty hack
-	    					pause_on_start = false;
-    					}
+    					if(pause_on_start) selItem.onItemClick(null, null, 0, 0); // dirty hack
     					if(now_playing != null) getWindow().setTitle(now_playing);
     					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_pause));
     					break;
@@ -252,6 +251,7 @@ public class AndLess extends Activity implements Comparator<File> {
     					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_play));
     					break;
     			}
+    			pause_on_start = false;
     		}
     	}
     	
@@ -493,13 +493,14 @@ public class AndLess extends Activity implements Comparator<File> {
     	AdapterView.OnItemClickListener selItem = new OnItemClickListener() {
 
     		public void onItemClick(AdapterView<?> a, View v, int i,long k) {
-    			
-    			if(i==0) {
+
+    			pause_on_start = false;
+    			if(i==0 && a != null) {
     				onButtUp();
     				return;
     			}
     			k = k-1;
-				if((int) k >= files.size()) {
+				if((int) k >= files.size() && a != null) {
 					log_err("cilcked item out of range! i: "+i+" k: "+k);
 					return;
 				}
@@ -1543,9 +1544,11 @@ public class AndLess extends Activity implements Comparator<File> {
 	    
     			BufferedReader reader = new BufferedReader(new FileReader(fpath), 8192);
     			String line = null;
-    			String path = cur_path.toString();
-    			if(!path.endsWith("/")) path += "/";
-    			
+    			String path = null;
+    			if(cur_path != null) {
+    				path = cur_path.toString();
+    				if(!path.endsWith("/")) path += "/";
+    			}
     			while ((line = reader.readLine()) != null) {
 	    			line = line.trim();
 	    			if(line.startsWith("File") && line.indexOf('=') > 4) {	// maybe it's a PLS file
@@ -1559,9 +1562,11 @@ public class AndLess extends Activity implements Comparator<File> {
 	    				filez.add(line);
 	    				continue;
 	    			}
-	    			f = new File(path+line);	// maybe it was a relative path 
-	    			if(f.exists() && !f.isDirectory() && hasAudioExt(path+line)) filez.add(path+line);
-    			}
+	    			if(path != null) {
+	    				f = new File(path+line);	// maybe it was a relative path 
+	    				if(f.exists() && !f.isDirectory() && hasAudioExt(path+line)) filez.add(path+line);
+	    			}
+	    		}
 	        
 	    		if(filez.size() == 0) {
 	    			Toast.makeText(getApplicationContext(), R.string.strBadPlist, Toast.LENGTH_SHORT).show();
