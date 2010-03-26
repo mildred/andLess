@@ -135,7 +135,7 @@ JNIEXPORT jboolean JNICALL Java_net_avs234_AndLessSrv_audioResume(JNIEnv *env, j
 }
 
 JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_audioGetDuration(JNIEnv *env, jobject obj, msm_ctx *ctx) {
-   if(!ctx || ctx->state != MSM_PLAYING) return 0;	
+   if(!ctx || (ctx->state != MSM_PLAYING && ctx->state != MSM_PAUSED)) return 0;	
    return ctx->track_time;
 }
 
@@ -234,7 +234,6 @@ void update_track_time(JNIEnv *env, jobject obj, int time) {
 
 #ifdef AVSREMOTE
 static const char *classPathName = "net/avs234/AndLessSrv";
-static const char *classPathName1 = "net/avs234/AndLess";
 
 static JNINativeMethod methods[] = {
  { "audioInit", "(II)I", (void *) Java_net_avs234_AndLessSrv_audioInit },

@@ -828,11 +828,13 @@ public class AndLess extends Activity implements Comparator<File> {
               		  if(pBar != null) pBar.setProgress(0);
               		  if(!samsung) ttu.start(curfile);
               		  else getWindow().setTitle(curfile);
+              		  if(buttPause != null) buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_pause));
               		  return;
               	  } else {
               	//	  if(pBar != null) pBar.setProgress(0);
               		  getWindow().setTitle(curfile);
-              		if(!samsung) ttu.shutdown();
+              		  if(!samsung) ttu.shutdown();
+              		  if(buttPause != null) buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_play));
               		  return;
               	  }
                 }

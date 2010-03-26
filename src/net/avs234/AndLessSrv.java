@@ -373,7 +373,7 @@ public class AndLessSrv extends Service {
 		}
 		
 		private int getCurPosition() {
-			if(!running) return 0;
+		//	if(!running) return 0;
 			if(cur_mode == MODE_NONE) {
 				if(mplayer != null) return mplayer.getCurrentPosition()/1000;
 			} 
@@ -382,7 +382,7 @@ public class AndLessSrv extends Service {
 		}
 	
 		private int getDuration() {
-			if(!running) return 0;
+		//	if(!running) return 0;
 			if(cur_mode == MODE_NONE) {
 				if(mplayer != null) return mplayer.getDuration()/1000;
 			} 
@@ -525,7 +525,7 @@ public class AndLessSrv extends Service {
 		public boolean play(int n, int start) {
 			log_msg(String.format("play(%d)",n));
 			stop();
-			if(n >= files.length || n < 0) return false;
+			if(files == null || n >= files.length || n < 0) return false;
 			cur_pos= n; cur_start = start;
 			th = new PlayThread();
 			log_msg(String.format("play(): created new thread from %d", Process.myTid()));
@@ -542,7 +542,7 @@ public class AndLessSrv extends Service {
 		}
 		public boolean pause() {
 			log_msg("pause()");
-			if(paused) return false;
+			if(files == null || paused) return false;
 				
 			if(mplayer != null) {
 				paused = true;
@@ -564,7 +564,7 @@ public class AndLessSrv extends Service {
 		}
 		public boolean resume() {
 			log_msg("resume()");
-			if(!paused) return false;
+			if(files == null || !paused) return false;
 			if(mplayer != null) {
 				paused = false;
 				try {
@@ -586,7 +586,7 @@ public class AndLessSrv extends Service {
 		}
 		public boolean dec_vol() {
 			log_msg("dec_vol()");
-			if(!running) return false;
+			if(files == null || !running) return false;
 			if(mplayer != null) return true;
 			int i = Process.getThreadPriority(Process.myTid()); 
 			Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
@@ -599,7 +599,7 @@ public class AndLessSrv extends Service {
 		}
 		public boolean inc_vol() {
 			log_msg("inc_vol()");
-			if(!running) return false;
+			if(files == null || !running) return false;
 			if(mplayer != null) return true;
 			int i = Process.getThreadPriority(Process.myTid()); 
 			Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
@@ -630,7 +630,7 @@ public class AndLessSrv extends Service {
 		public boolean	resume() 		{ return plist.resume(); }
 		public boolean	inc_vol() 		{ return plist.inc_vol(); }
 		public boolean	dec_vol() 		{ return plist.dec_vol(); }
-		public boolean	shutdown() 		{ plist.stop();  audioExit(ctx); ctx = 0; return true; }
+		public boolean	shutdown() 		{ plist.stop();  if(ctx != 0) audioExit(ctx); ctx = 0; return true; }
 		public boolean	is_running()	{ return plist.running; }
 		public boolean  initialized() 	{ return ctx != 0; }	// why this function? 
 		public boolean	is_paused()		{ return plist.paused; }
