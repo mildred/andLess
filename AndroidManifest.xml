@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="net.avs234"
-      android:versionCode="1" android:versionName="1.1">
+      android:versionCode="2" android:versionName="1.2">
     <application android:icon="@drawable/new_icon" android:label="@string/app_name">
 
         <activity android:name=".AndLess"
@@ -27,13 +27,8 @@
 	<supports-screens />
 	
 <uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
-
 <!--  android:process=":remote" -->
-
 <uses-permission android:name="android.permission.READ_PHONE_STATE"></uses-permission>
 <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"></uses-permission>
-
-
-
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 </manifest> 
