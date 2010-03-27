@@ -239,8 +239,13 @@ public class AndLessSrv extends Service {
 			return;
 		}
 		final Notification notty = new Notification(icon, s, System.currentTimeMillis());
+		Intent intent = new Intent();
+		intent.setAction("android.intent.action.MAIN");
+		intent.addCategory("android.intent.category.LAUNCHER");
+		intent.setClass(this, AndLess.class);
+		intent.setFlags(0x10100000);
 		notty.setLatestEventInfo(getApplicationContext(), "andLess", s, 
-					PendingIntent.getActivity(this, 0, new Intent(this,AndLess.class), 0));
+					PendingIntent.getActivity(this, 0, intent, 0));
 		nm.notify(NOTIFY_ID,notty);
 	}
 	
