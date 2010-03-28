@@ -153,22 +153,16 @@ public class AndLessSrv extends Service {
 	private MediaPlayer mplayer = null;
 	private Object mplayer_lock= new Object();
 	private int fck_start;
+	private boolean isPrepared;
 	public int extPlay(String file, int start) {
 		try {
-			
-			mplayer = new MediaPlayer();
+			isPrepared = false;
+			if(mplayer == null) {
+				mplayer = new MediaPlayer();
+			}
 			fck_start = start;
 			if(mplayer == null) return LIBLOSSLESS_ERR_NOCTX;
-
 			mplayer.setDataSource(file);
-	/*		
-			mplayer.prepare();
-		
-			if(start != 0) mplayer.seekTo(start*1000);
-			curTrackLen = mplayer.getDuration()/1000;
-			mplayer.start();
-		*/	
-
 			mplayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
 				public boolean onError(MediaPlayer mp, int what, int extra) {
 					if(mplayer != null) synchronized(mplayer_lock) {
@@ -188,31 +182,18 @@ public class AndLessSrv extends Service {
 					}
 				}
 			});
-
-			//////////////
-			
 			mplayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
 				public void onPrepared(MediaPlayer mp) {
+					isPrepared = true;
 					if(fck_start != 0) mplayer.seekTo(fck_start*1000);
 					curTrackLen = mplayer.getDuration()/1000;
+					mplayer.start();
 				}
 			});
 			
 			mplayer.prepare();
-			SystemClock.sleep(250);
-			if(start != 0) mplayer.seekTo(start*1000);
-			curTrackLen = mplayer.getDuration()/1000;
-			mplayer.start();
-			
-			
-			//////////////
-			
-			if(!mplayer.isPlaying()) return LIBLOSSLESS_ERR_INV_PARM;
-
-			if(curTrackLen <= 0) {	// WTF???
-				curTrackLen = mplayer.getDuration()/1000; 
-			}
-			
+			//SystemClock.sleep(250);
+			//if(!mplayer.isPlaying()) return LIBLOSSLESS_ERR_INV_PARM;
 			synchronized(mplayer_lock) {
 				mplayer_lock.wait();
 			}
@@ -389,7 +370,10 @@ public class AndLessSrv extends Service {
 		private int getDuration() {
 		//	if(!running) return 0;
 			if(cur_mode == MODE_NONE) {
-				if(mplayer != null) return mplayer.getDuration()/1000;
+				do {
+					SystemClock.sleep(200);
+		        } while (!isPrepared);
+				if(mplayer != null && isPrepared) return mplayer.getDuration()/1000;
 			} 
 			if(ctx == 0) return 0;
 			return audioGetDuration(ctx);
@@ -537,6 +521,11 @@ public class AndLessSrv extends Service {
 			th.start();
 			return true;
 		}
+		public boolean seekTo(int p) {
+			log_msg(String.format("seekTo(%d)",p));
+			mplayer.seekTo(p);
+			return true;
+		}
 		public boolean play_next() {
 			log_msg("play_next()");
 			return play(cur_pos+1,0);
@@ -629,6 +618,7 @@ public class AndLessSrv extends Service {
 		}
 		public boolean  add_to_playlist(String src, String name, int start_time, int pos) { return plist.add_to_playlist(src,name,start_time,pos);}
 		public boolean	play (int n, int start) 	{ return plist.play(n,start); }
+		public boolean	seek_to (int p) 	{ return plist.seekTo(p); }
 		public boolean	play_next()  	{ return plist.play_next(); }
 		public boolean	play_prev()  	{ return plist.play_prev(); }
 		public boolean	pause() 		{ return plist.pause(); }
@@ -639,6 +629,7 @@ public class AndLessSrv extends Service {
 		public boolean	is_running()	{ return plist.running; }
 		public boolean  initialized() 	{ return ctx != 0; }	// why this function? 
 		public boolean	is_paused()		{ return plist.paused; }
+		public int		get_cur_mode()	{ return plist.cur_mode; }
 		public String	get_cur_dir()	{ return plist.dir; }
 		public int		get_cur_pos()	{ return plist.cur_pos; }
 		public int		get_cur_seconds()		{ return plist.getCurPosition(); }

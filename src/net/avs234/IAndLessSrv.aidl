@@ -6,6 +6,7 @@ interface IAndLessSrv {
 	boolean init_playlist(in String path, int nitems);
 	boolean add_to_playlist(in String track_source, in String track_name, int start_time, int pos);
 	boolean play(int n, int start);
+	boolean seek_to(int p);
 	boolean play_next();
 	boolean play_prev();
 	boolean pause();
@@ -16,6 +17,7 @@ interface IAndLessSrv {
 	boolean is_running();
 	boolean is_paused();
 	boolean initialized();
+	int 	get_cur_mode();
 	String  get_cur_dir();
 	int		get_cur_pos();
 	String  get_cur_track_source();

@@ -51,6 +51,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import net.avs234.iconifiedlist.IconifiedText;
 import net.avs234.iconifiedlist.IconifiedTextListAdapter;
@@ -412,6 +413,32 @@ public class AndLess extends Activity implements Comparator<File> {
     		}
     	};
     	
+    	OnSeekBarChangeListener onSeekBar = new OnSeekBarChangeListener() {
+
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+				String sTime = (progress < 3600) ? String.format("%d:%02d", progress/60, progress % 60) 
+						:	String.format("%d:%02d:%02d", progress/3600, (progress % 3600)/60, progress % 60);
+   				nowTime.setText(sTime);
+			}
+
+			public void onStartTrackingTouch(SeekBar seekBar) {
+				
+			}
+
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				try {
+					if(srv.get_cur_mode() == 0) {
+						srv.seek_to(seekBar.getProgress()*1000);
+					} else {
+						srv.play(srv.get_cur_pos(), seekBar.getProgress());
+					}
+				} catch (RemoteException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		};
+    	
     	private void onButtUp() {
     		if(cur_path == null) return;
 			File path = cur_path.getParentFile();
@@ -556,7 +583,7 @@ public class AndLess extends Activity implements Comparator<File> {
 	        					}
 	    	        		}
 	    	        		srv.set_driver_mode(prefs.driver_mode);
-    						if(!srv.play(track -first_file_pos,seconds)) {
+    						if(!srv.play(track-first_file_pos,seconds)) {
     							Toast.makeText(getApplicationContext(), R.string.strSrvFail, Toast.LENGTH_SHORT).show();
     							log_err("failed to start playing <bookmarked file>"); 
     						}
@@ -738,28 +765,34 @@ public class AndLess extends Activity implements Comparator<File> {
 						progressUpdate.post(new Runnable() {
 							public void run() {
 								if(srv == null) return;
-								try {
-									if(!srv.is_running() || srv.is_paused()) return;
-					   				if(need_update) {		// track_time was unknown at init time
-					   				//	int track_time = AndLessSrv.curTrackLen;
-					   					int track_time = srv.get_cur_track_len();
-					   					if(track_time <= 0) {
-					   						track_time = srv.get_track_duration();
-					   						if(track_time <=0) return;
-					   					}	
-					       				curWindowTitle = (track_time < 3600) ? String.format("[%d:%02d] %s", track_time/60, track_time % 60, track_name) 
-					       					:	String.format("[%d:%02d:%02d] %s", track_time/3600, (track_time % 3600)/60, track_time % 60, track_name);
-					       				getWindow().setTitle(curWindowTitle);
-					       				pBar.setMax(track_time);
-					   					need_update = false;
-					   				}
-								//	pBar.setProgress(srv.get_cur_seconds() - AndLessSrv.curTrackStart);
-					   				pBar.setProgress(srv.get_cur_seconds() - srv.get_cur_track_start());
-					   				String sTime = (srv.get_cur_seconds() < 3600) ? String.format("%d:%02d", srv.get_cur_seconds()/60, srv.get_cur_seconds() % 60) 
-											:	String.format("%d:%02d:%02d", srv.get_cur_seconds()/3600, (srv.get_cur_seconds() % 3600)/60, srv.get_cur_seconds() % 60);
-					   				nowTime.setText(sTime);
-								} catch (Exception e) { 
-									log_err("exception 1 in progress update handler: " + e.toString()); 
+								if(!pBar.isPressed()) { 
+									try {
+										if(!srv.is_running() || srv.is_paused()) return;
+						   				if(need_update) {		// track_time was unknown at init time
+						   				//	int track_time = AndLessSrv.curTrackLen;
+						   					int track_time = srv.get_cur_track_len();
+						   					if(track_time <= 0) {
+						   						track_time = srv.get_track_duration();
+						   						if(track_time <=0) return;
+						   					}	
+						       				curWindowTitle = (track_time < 3600) ? String.format("[%d:%02d] %s", track_time/60, track_time % 60, track_name) 
+						       					:	String.format("[%d:%02d:%02d] %s", track_time/3600, (track_time % 3600)/60, track_time % 60, track_name);
+						       				getWindow().setTitle(curWindowTitle);
+						       				pBar.setMax(track_time);
+						       				String sTime = (track_time < 3600) ? String.format("%d:%02d", track_time/60, track_time % 60) 
+													:	String.format("%d:%02d:%02d", track_time/3600, (track_time % 3600)/60, track_time % 60);
+											allTime.setText(sTime);
+						   					need_update = false;
+						   				}
+									//	pBar.setProgress(srv.get_cur_seconds() - AndLessSrv.curTrackStart);
+						   				int progress = srv.get_cur_seconds() - srv.get_cur_track_start();
+						   				if(progress > 0) pBar.setProgress(progress);
+						   				String sTime = (srv.get_cur_seconds() < 3600) ? String.format("%d:%02d", srv.get_cur_seconds()/60, srv.get_cur_seconds() % 60) 
+												:	String.format("%d:%02d:%02d", srv.get_cur_seconds()/3600, (srv.get_cur_seconds() % 3600)/60, srv.get_cur_seconds() % 60);
+						   				nowTime.setText(sTime);
+									} catch (Exception e) { 
+										log_err("exception 1 in progress update handler: " + e.toString()); 
+									}
 								}
 							}
 						});
@@ -768,25 +801,27 @@ public class AndLess extends Activity implements Comparator<File> {
 					progressUpdate.post(new Runnable() {	// initialize
 						public void run() {
 							if(srv == null) return;
-							try {
-							//	int track_time = AndLessSrv.curTrackLen;
-								int track_time = srv.get_cur_track_len();
-								need_update = false;
-								if(track_time <= 0) {
-									log_msg("progressUpdate(): fishy track_time " + track_time);
-									track_time = srv.get_track_duration();
-									if(track_time <=0) need_update = true;
+							if(!pBar.isPressed()) {
+								try {
+								//	int track_time = AndLessSrv.curTrackLen;
+									int track_time = srv.get_cur_track_len();
+									need_update = false;
+									if(track_time <= 0) {
+										log_msg("progressUpdate(): fishy track_time " + track_time);
+										track_time = srv.get_track_duration();
+										if(track_time <=0) need_update = true;
+									}
+									curWindowTitle = (track_time < 3600) ? String.format("[%d:%02d] %s", track_time/60, track_time % 60, track_name) 
+										:	String.format("[%d:%02d:%02d] %s", track_time/3600, (track_time % 3600)/60, track_time % 60, track_name);
+									
+									getWindow().setTitle(curWindowTitle);
+									pBar.setMax(track_time);
+									String sTime = (track_time < 3600) ? String.format("%d:%02d", track_time/60, track_time % 60) 
+											:	String.format("%d:%02d:%02d", track_time/3600, (track_time % 3600)/60, track_time % 60);
+									allTime.setText(sTime);
+								} catch (Exception e) { 
+									log_err("exception 2 in progress update handler: " + e.toString()); 
 								}
-								curWindowTitle = (track_time < 3600) ? String.format("[%d:%02d] %s", track_time/60, track_time % 60, track_name) 
-									:	String.format("[%d:%02d:%02d] %s", track_time/3600, (track_time % 3600)/60, track_time % 60, track_name);
-								
-								getWindow().setTitle(curWindowTitle);
-								pBar.setMax(track_time);
-								String sTime = (track_time < 3600) ? String.format("%d:%02d", track_time/60, track_time % 60) 
-										:	String.format("%d:%02d:%02d", track_time/3600, (track_time % 3600)/60, track_time % 60);
-								allTime.setText(sTime);
-							} catch (Exception e) { 
-								log_err("exception 2 in progress update handler: " + e.toString()); 
 							}
 						}
 					});
@@ -825,7 +860,7 @@ public class AndLess extends Activity implements Comparator<File> {
               	  boolean error = bb.getBoolean("error");
               	  if(!error) {	
               		  // normal track, need to setup track time/progress update stuff
-              		  if(pBar != null) pBar.setProgress(0);
+              		  // if(pBar != null) pBar.setProgress(0);
               		  if(!samsung) ttu.start(curfile);
               		  else getWindow().setTitle(curfile);
               		  if(buttPause != null) buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_pause));
@@ -839,7 +874,7 @@ public class AndLess extends Activity implements Comparator<File> {
               	  }
                 }
                 if(!samsung) ttu.shutdown();
-        		if(pBar != null) pBar.setProgress(0);
+        		// if(pBar != null) pBar.setProgress(0);
                 curfile = bb.getString("errormsg");
                 if(curfile == null) return;
                 showMsg(curfile);
@@ -1005,6 +1040,7 @@ public class AndLess extends Activity implements Comparator<File> {
             nowTime = (TextView) findViewById(R.id.nowTime);
             allTime = (TextView) findViewById(R.id.allTime);
             pBar = (SeekBar) findViewById(R.id.PBar);
+            pBar.setOnSeekBarChangeListener(onSeekBar);
             buttPause.setOnClickListener(onButtPause);
             buttPrev.setOnClickListener(onButtPrev);
             buttNext.setOnClickListener(onButtNext);
