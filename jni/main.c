@@ -76,6 +76,8 @@ int audio_start(msm_ctx *ctx, int channels, int samplerate) {
            return msm_start(ctx, channels, samplerate);
         case MODE_LIBMEDIA:
            return libmedia_start(ctx, channels, samplerate);
+	case MODE_CALLBACK:
+           return libmediacb_start(ctx, channels, samplerate);
         default:
            break;
     }
@@ -90,7 +92,8 @@ void audio_stop(msm_ctx *ctx) {
 	close(ctx->fd); ctx->fd = -1;
     }	
     if(ctx->mode == MODE_DIRECT) msm_stop(ctx);
-    else if(ctx->mode == MODE_LIBMEDIA)	libmedia_stop(ctx);
+    else if(ctx->mode == MODE_LIBMEDIA) libmedia_stop(ctx); 
+    else if(ctx->mode == MODE_CALLBACK) libmediacb_stop(ctx);
 
     ctx->state = MSM_STOPPED;	
     pthread_mutex_unlock(&ctx->mutex);
@@ -104,12 +107,13 @@ ssize_t audio_write(msm_ctx *ctx, const void *buf, size_t count) {
            return write(ctx->afd, buf, count);
         case MODE_LIBMEDIA:
            return libmedia_write(ctx, buf, count);
+	case MODE_CALLBACK:
+           return libmediacb_write(ctx, buf, count);
         default:
            break;
     }
     return -1;
 }
-
 
 JNIEXPORT jboolean JNICALL Java_net_avs234_AndLessSrv_audioStop(JNIEnv *env, jobject obj, msm_ctx *ctx) {
     if(!ctx) return false;	
@@ -122,13 +126,13 @@ JNIEXPORT jboolean JNICALL Java_net_avs234_AndLessSrv_audioPause(JNIEnv *env, jo
     if(!ctx || ctx->state != MSM_PLAYING) return false;
     pthread_mutex_lock(&ctx->mutex);
     ctx->state = MSM_PAUSED;
-    if(ctx->mode == MODE_LIBMEDIA) libmedia_pause(ctx);
+    if(ctx->mode == MODE_LIBMEDIA || ctx->mode == MODE_CALLBACK) libmedia_pause(ctx);
     return true;		
 }
 
 JNIEXPORT jboolean JNICALL Java_net_avs234_AndLessSrv_audioResume(JNIEnv *env, jobject obj, msm_ctx *ctx) {
     if(!ctx || ctx->state != MSM_PAUSED) return false;
-    if(ctx->mode == MODE_LIBMEDIA) libmedia_resume(ctx);
+    if(ctx->mode == MODE_LIBMEDIA || ctx->mode == MODE_CALLBACK ) libmedia_resume(ctx);
     ctx->state = MSM_PLAYING;	
     pthread_mutex_unlock(&ctx->mutex);
     return true;	
@@ -162,8 +166,9 @@ JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_audioInit(JNIEnv *env, jobject
     	}
         ctx->afd = -1; ctx->fd = -1;
 	pthread_mutex_init(&ctx->mutex,0);
+	pthread_mutex_init(&ctx->cbmutex,0);
+	pthread_cond_init(&ctx->cbcond,0);
     }	
-
     ctx->mode = mode;
     ctx->state = MSM_STOPPED;
     ctx->track_time = 0;	
@@ -175,7 +180,10 @@ JNIEXPORT jboolean JNICALL Java_net_avs234_AndLessSrv_audioExit(JNIEnv *env, job
     audio_stop(ctx);
     if(ctx->fd >= 0)  close(ctx->fd);
     pthread_mutex_destroy(&ctx->mutex);
-    if(ctx->wavbuf) free(ctx->wavbuf);	
+    pthread_mutex_destroy(&ctx->cbmutex);
+    pthread_cond_destroy(&ctx->cbcond);
+    if(ctx->wavbuf) free(ctx->wavbuf);
+    if(ctx->cbbuf) free(ctx->cbbuf);		
     free(ctx);	
     return true;
 }

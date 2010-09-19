@@ -18,14 +18,17 @@ typedef struct {
    enum _msm_mode_t {
 	MODE_NONE = 0,
 	MODE_DIRECT = 1,	
-	MODE_LIBMEDIA = 2
+	MODE_LIBMEDIA = 2,
+	MODE_CALLBACK = 3
    } mode; 	 	
-   int afd, fd, conf_size;
-   unsigned char *wavbuf;
+   int afd, fd, conf_size, cbbuf_size;
+   unsigned char *wavbuf, *cbbuf;
    void *track; 	
    int  track_time;	
    int  channels, samplerate, bps, written;
-   pthread_mutex_t mutex;
+   int  cbstart, cbend;	
+   pthread_mutex_t mutex, cbmutex;
+   pthread_cond_t  cbcond;
 } msm_ctx;
 
 extern int  audio_start(msm_ctx *ctx, int channels, int samplerate);
@@ -54,6 +57,12 @@ extern JNIEXPORT jintArray JNICALL extract_flac_cue(JNIEnv *env, jobject obj, js
 
 #define DEFAULT_CONF_BUFSZ 		(4800*4)
 #define DEFAULT_WAV_BUFSZ 		(128*1024)
+
+// For initialization of AudioTrack in MODE_CALLBACK, affects the track latency
+#define DEFAULT_ATRACK_CONF_BUFSZ 	DEFAULT_CONF_BUFSZ
+
+// Callback buffer size, must be larger than (but shouldn't be a multiple of) DEFAULT*CONF_BUFSZ
+#define DEFAULT_CB_BUFSZ		(4*DEFAULT_CONF_BUFSZ+2)
 
 #define LIBLOSSLESS_ERR_NOCTX		1
 #define LIBLOSSLESS_ERR_INV_PARM	2
