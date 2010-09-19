@@ -357,7 +357,7 @@ public class AndLessSrv extends Service {
 			cur_mode = mode;
            	return true;
 		}
-		
+				
 		private int getCurPosition() {
 		//	if(!running) return 0;
 			if(cur_mode == MODE_NONE) {

@@ -103,6 +103,12 @@ ssize_t libmedia_write(msm_ctx *ctx, const void *buf, size_t count) {
 ////////////////////////////////////
 ////////// MODE_CALLBACK ///////////
 
+#include <sys/resource.h>
+static void print_priority(const char *c) {
+ int p = getpriority(0,0);
+ __android_log_print(ANDROID_LOG_INFO,"liblossless","%s: priority=%d", c, p);
+}
+
 static void cbf(int event, void* user, void *info);
 
 int libmediacb_start(msm_ctx *ctx, int channels, int samplerate) {
@@ -163,6 +169,9 @@ int libmediacb_start(msm_ctx *ctx, int channels, int samplerate) {
 
    atrack->setPositionUpdatePeriod(0);
    atrack->setMarkerPosition(0); 	
+
+   static int s(0); if(!s) { print_priority(__FUNCTION__); s = 1; } 		
+
    return 0; 
 }
 
@@ -217,6 +226,10 @@ ssize_t libmediacb_write(msm_ctx *ctx, const void *buf, size_t cnt) {
 	}
 	pthread_mutex_unlock(&ctx->cbmutex);
 
+
+   static int s(0);  if(!s) {  print_priority(__FUNCTION__); s = 1; }
+
+
     return count; 	
 }
 
@@ -264,6 +277,12 @@ static void cbf(int event, void* user, void *info) {
 	}
 	pthread_cond_signal(&ctx->cbcond);
 	pthread_mutex_unlock(&ctx->cbmutex);
+
+   static int s = 0;
+   if(!s) {
+	//	setpriority(0,0,-19);   
+     print_priority(__FUNCTION__); s = 1;
+   }
 }
 
 

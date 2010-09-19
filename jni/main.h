@@ -19,7 +19,8 @@ typedef struct {
 	MODE_NONE = 0,
 	MODE_DIRECT = 1,	
 	MODE_LIBMEDIA = 2,
-	MODE_CALLBACK = 3
+	MODE_CALLBACK = 3,
+	MODE_JAVA = 4
    } mode; 	 	
    int afd, fd, conf_size, cbbuf_size;
    unsigned char *wavbuf, *cbbuf;
@@ -33,7 +34,7 @@ typedef struct {
 
 extern int  audio_start(msm_ctx *ctx, int channels, int samplerate);
 extern void audio_stop(msm_ctx *ctx);
-extern ssize_t  audio_write(msm_ctx *ctx, const void *buf, size_t count);
+extern ssize_t  audio_write(JNIEnv *env, jobject obj, msm_ctx *ctx, const void *buf, size_t count);
 extern void update_track_time(JNIEnv *env, jobject obj, int time);
 
 extern JNIEXPORT jint	  JNICALL Java_net_avs234_AndLessSrv_audioInit(JNIEnv *env, jobject obj, msm_ctx *prev_ctx, jint mode);
@@ -55,14 +56,14 @@ extern JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_mpcPlay(JNIEnv *env, jo
 extern JNIEXPORT jintArray JNICALL extract_flac_cue(JNIEnv *env, jobject obj, jstring jfile);
 
 
-#define DEFAULT_CONF_BUFSZ 		(4800*4)
+#define DEFAULT_CONF_BUFSZ 		(4800*4*4)
 #define DEFAULT_WAV_BUFSZ 		(128*1024)
 
 // For initialization of AudioTrack in MODE_CALLBACK, affects the track latency
 #define DEFAULT_ATRACK_CONF_BUFSZ 	DEFAULT_CONF_BUFSZ
 
 // Callback buffer size, must be larger than (but shouldn't be a multiple of) DEFAULT*CONF_BUFSZ
-#define DEFAULT_CB_BUFSZ		(4*DEFAULT_CONF_BUFSZ+2)
+#define DEFAULT_CB_BUFSZ		(8*DEFAULT_CONF_BUFSZ+2)
 
 #define LIBLOSSLESS_ERR_NOCTX		1
 #define LIBLOSSLESS_ERR_INV_PARM	2

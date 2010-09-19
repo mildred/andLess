@@ -67,7 +67,6 @@ static void msm_stop(msm_ctx *ctx) {
     }	
 }
 
-
 int audio_start(msm_ctx *ctx, int channels, int samplerate) {
 
     if(!ctx) return LIBLOSSLESS_ERR_NOCTX;
@@ -91,15 +90,23 @@ void audio_stop(msm_ctx *ctx) {
     if(ctx->fd >= 0) {
 	close(ctx->fd); ctx->fd = -1;
     }	
-    if(ctx->mode == MODE_DIRECT) msm_stop(ctx);
-    else if(ctx->mode == MODE_LIBMEDIA) libmedia_stop(ctx); 
-    else if(ctx->mode == MODE_CALLBACK) libmediacb_stop(ctx);
-
+    switch(ctx->mode) {
+        case MODE_DIRECT:
+           return msm_stop(ctx);
+        case MODE_LIBMEDIA:
+           return libmedia_stop(ctx);
+        case MODE_CALLBACK:
+           return libmediacb_stop(ctx);
+        default:
+           break;
+    }
     ctx->state = MSM_STOPPED;	
     pthread_mutex_unlock(&ctx->mutex);
 }
 
-ssize_t audio_write(msm_ctx *ctx, const void *buf, size_t count) {
+ssize_t java_audio_write(JNIEnv *env, jobject obj, msm_ctx *ctx, const void *buf, size_t count);
+
+ssize_t audio_write(JNIEnv *env, jobject obj, msm_ctx *ctx, const void *buf, size_t count) {
 
     if(!ctx) return LIBLOSSLESS_ERR_NOCTX;
     switch(ctx->mode) {
@@ -109,6 +116,8 @@ ssize_t audio_write(msm_ctx *ctx, const void *buf, size_t count) {
            return libmedia_write(ctx, buf, count);
 	case MODE_CALLBACK:
            return libmediacb_write(ctx, buf, count);
+        case MODE_JAVA:
+           return java_audio_write(env,obj,ctx, buf, count);
         default:
            break;
     }
@@ -303,7 +312,62 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 #endif
 
 
+//////////////////////////////////
+////////// MODE_JAVA //////////////
 
+
+/*
+To call Java function: 
+void writePCM(byte pcm_arr[]);
+pcm_arr = new byte array of length "count"
+*/
+
+
+ssize_t java_audio_write(JNIEnv *env, jobject obj, msm_ctx *ctx, const void *buf, size_t count) {
+  if(!ctx) return -1;
+
+#ifndef AVSREMOTE
+     jclass cls = (*env)->GetObjectClass(env, obj);
+     jmethodID mid = (*env)->GetStaticMethodID(env, cls, "writePCM", "([B)V");
+     if (mid == NULL) {
+          __android_log_print(ANDROID_LOG_ERROR,"liblossless","Cannot find java callback to update time");
+         return -1;
+     }
+     jbyteArray array = (*env)->NewByteArray(env, count);
+     (*env)->SetByteArrayRegion(env, array, 0, count, (jbyte *)buf);
+     (*env)->CallStaticVoidMethod(env,cls,mid,array);
+     (*env)->DeleteLocalRef(env, array);
+#else
+     jclass cls;
+     jmethodID mid;
+     bool attached = false;
+     JNIEnv *envy;
+        if((*gvm)->GetEnv(gvm, (void **)&envy, JNI_VERSION_1_4) != JNI_OK) {
+            __android_log_print(ANDROID_LOG_ERROR,"liblossless","update_track_time: GetEnv FAILED");
+             if((*gvm)->AttachCurrentThread(gvm, &envy, NULL) != JNI_OK) {
+                __android_log_print(ANDROID_LOG_ERROR,"liblossless","AttachCurrentThread FAILED");
+                     return -1;
+             }
+             attached = true;
+        }
+        cls = (*envy)->GetObjectClass(envy,giface);
+        if(!cls) {
+          __android_log_print(ANDROID_LOG_ERROR,"liblossless","failed to get class iface");
+          return -1;
+        }
+        mid = (*env)->GetStaticMethodID(envy, cls, "writePCM", "([B)V");
+        if(mid == NULL) {
+          __android_log_print(ANDROID_LOG_ERROR,"liblossless","Cannot find java callback to update time");
+         return -1;
+        }
+     jbyteArray array = (*env)->NewByteArray(env, count);
+     (*env)->SetByteArrayRegion(env, array, 0, count, (jbyte *)buf);
+     (*env)->CallStaticVoidMethod(env,cls,mid,array);
+     (*env)->DeleteLocalRef(env, array);
+#endif
+
+  return count;
+}
 
 
 
