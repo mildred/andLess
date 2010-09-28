@@ -51,6 +51,9 @@ public class AndLessSrv extends Service {
 	public static native int		mpcPlay(int ctx,String file, int start);
 	public static native int []		extractFlacCUE(String file);
 	
+	public static native int		wvDuration(int ctx,String file);
+	public static native int		apeDuration(int ctx,String file);
+	
 	/*
 	public native int 		audioInit(int ctx, int mode);	
 	public native boolean	audioExit(int ctx);

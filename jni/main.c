@@ -268,6 +268,8 @@ static JNINativeMethod methods[] = {
  { "wvPlay", "(ILjava/lang/String;I)I", (void *) Java_net_avs234_AndLessSrv_wvPlay },
  { "mpcPlay", "(ILjava/lang/String;I)I", (void *) Java_net_avs234_AndLessSrv_mpcPlay },
  { "extractFlacCUE", "(Ljava/lang/String;)[I", (void *) extract_flac_cue },
+ { "wvDuration", "(ILjava/lang/String;)I", (void *) Java_com_skvalex_amplayer_wvDuration },
+ { "apeDuration", "(ILjava/lang/String;)I", (void *) Java_com_skvalex_amplayer_apeDuration },
 };
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {

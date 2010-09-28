@@ -446,3 +446,69 @@ JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_apePlay(JNIEnv *env, jobject o
     return 0;
 }
 
+JNIEXPORT jint JNICALL Java_com_skvalex_amplayer_apeDuration(JNIEnv *env, jobject obj, msm_ctx* ctx, jstring jfile) {
+
+    int currentframe, nblocks, bytesconsumed;
+    int bytesinbuffer, blockstodecode, firstbyte;
+    int i = 0, n, bytes_to_write;
+
+    int16_t  sample16;
+    int32_t  sample32;
+
+    const char *file = (*env)->GetStringUTFChars(env,jfile,NULL);
+
+    unsigned char inbuffer[INPUT_CHUNKSIZE];
+    int32_t decoded0[BLOCKS_PER_LOOP];
+    int32_t decoded1[BLOCKS_PER_LOOP];
+
+    unsigned char *p;
+
+    struct timeval tstart, tstop, ttmp; // tstart -> time of the last write.
+    useconds_t  tminwrite;
+
+    struct ape_ctx_t ape_ctx;
+    int prev_written = 0;
+
+    uint32_t samplestoskip;
+
+#ifdef DBG_TIME
+        uint64_t total_tminwrite = 0, total_ttmp = 0, total_sleep = 0;
+        int writes = 0, fails = 0;
+#endif
+
+	ctx->fd = open(file,O_RDONLY);
+	(*env)->ReleaseStringUTFChars(env,jfile,file);
+
+	if(ctx->fd < 0) return -1;
+
+    /* Read the file headers to populate the ape_ctx struct */
+
+	if(read(ctx->fd, ctx->wavbuf, INPUT_CHUNKSIZE) != INPUT_CHUNKSIZE) return -1;
+
+	if(ape_parseheaderbuf(ctx->wavbuf,&ape_ctx) < 0) return -1;
+
+	if ((ape_ctx.fileversion < APE_MIN_VERSION) || (ape_ctx.fileversion > APE_MAX_VERSION)) {
+	        close(ctx->fd);
+	        return -1;
+	}
+
+	   uint32_t filepos, newframe, start_sample;
+
+	        ape_ctx.seektable = (uint32_t *) malloc(ape_ctx.seektablelength);
+	        if(!ape_ctx.seektable) {
+        	        close(ctx->fd);
+	                return -1;
+	        }
+        	if(lseek(ctx->fd, ape_ctx.seektablefilepos, SEEK_SET) < 0) {
+                	free(ape_ctx.seektable);
+	                close(ctx->fd);
+        	        return -1;
+	        }
+        	if(read(ctx->fd, ape_ctx.seektable, ape_ctx.seektablelength) != ape_ctx.seektablelength) {
+                	free(ape_ctx.seektable);
+	                close(ctx->fd);
+        	        return -1;
+	        }
+        close(ctx->fd);
+        return ape_ctx.totalsamples/ape_ctx.samplerate;
+}
