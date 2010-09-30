@@ -252,6 +252,10 @@ static void cbf(int event, void* user, void *info) {
 	    return;	
 	}
 	pthread_mutex_lock(&ctx->cbmutex);
+        if(ctx->cbstart < 0) {  // we have been stopped from libmediacb_stop
+                pthread_mutex_unlock(&ctx->cbmutex);
+                return;
+        }
         k = ctx->cbbuf_size - get_free_bytes(ctx); // k == bytes available for output
 	if(k < buff->size) {
            __android_log_print(ANDROID_LOG_INFO,"liblossless",
