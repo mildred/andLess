@@ -3,8 +3,11 @@ package net.avs234;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1463,7 +1466,8 @@ public class AndLess extends Activity implements Comparator<File> {
 			
     		File [] filez = fpath.listFiles();
 			
-			if(filez.length == 0) return null;
+			// listFiles() may return null in some conditions.
+			if(filez == null || filez.length == 0) return null;
 		    		
 			Comparator<File>cmp = this;
 			Arrays.sort(filez,	cmp);  
@@ -1579,8 +1583,15 @@ public class AndLess extends Activity implements Comparator<File> {
     		ArrayList<String> filez = new ArrayList<String>();
     		
     		try {
+    			BufferedReader reader;
+				if (checkUTF16(fpath)) {
+					reader = new BufferedReader(new InputStreamReader(
+							new FileInputStream(fpath), "UTF-16"), 8192);
+				} else {
+					reader = new BufferedReader(new InputStreamReader(
+							new FileInputStream(fpath)), 8192);
+				}
 	    
-    			BufferedReader reader = new BufferedReader(new FileReader(fpath), 8192);
     			String line = null;
     			String path = null;
     			if(cur_path != null) {
@@ -1683,9 +1694,14 @@ public class AndLess extends Activity implements Comparator<File> {
     	
     	private parsed_cue parseCue(File fpath) {
     		try {
-    	       
-    			BufferedReader reader = new BufferedReader(new FileReader(fpath), 8192);
-    	        
+    			BufferedReader reader;
+				if (checkUTF16(fpath)) {
+					reader = new BufferedReader(new InputStreamReader(
+							new FileInputStream(fpath), "UTF-16"), 8192);
+				} else {
+					reader = new BufferedReader(new InputStreamReader(
+							new FileInputStream(fpath)), 8192);
+				}
     	        String line = null;
     	        ArrayList<String> filez = new ArrayList<String>();
     	        ArrayList<String> namez = new ArrayList<String>();
@@ -1835,5 +1851,20 @@ public class AndLess extends Activity implements Comparator<File> {
     		}
     	}
 
+    	private Boolean checkUTF16(File fpath) throws IOException
+    	{
+    		FileInputStream fr = new FileInputStream(fpath);
+    		byte[] bytes = new byte[2];
+    		if(fr.read(bytes, 0, 2) < 2)
+    		{
+    			throw new IOException("failed reading file in checkUTF16()");
+    		}
+    		fr.close();
+
+			// First two bytes are equals to Byte Order Mark
+			// for Little Endian (0xFFFE) or Big Endian (0xFEFF).
+			return (bytes[0] == -1 && bytes[1] == -2)
+					|| (bytes[0] == -2 && bytes[1] == -1);
+    	}
 }
 
