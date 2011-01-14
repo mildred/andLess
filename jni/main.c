@@ -92,11 +92,11 @@ void audio_stop(msm_ctx *ctx) {
     }	
     switch(ctx->mode) {
         case MODE_DIRECT:
-           return msm_stop(ctx);
+           msm_stop(ctx); break;
         case MODE_LIBMEDIA:
-           return libmedia_stop(ctx);
+           libmedia_stop(ctx); break;
         case MODE_CALLBACK:
-           return libmediacb_stop(ctx);
+           libmediacb_stop(ctx); break;
         default:
            break;
     }
@@ -104,9 +104,7 @@ void audio_stop(msm_ctx *ctx) {
     pthread_mutex_unlock(&ctx->mutex);
 }
 
-ssize_t java_audio_write(JNIEnv *env, jobject obj, msm_ctx *ctx, const void *buf, size_t count);
-
-ssize_t audio_write(JNIEnv *env, jobject obj, msm_ctx *ctx, const void *buf, size_t count) {
+ssize_t audio_write(msm_ctx *ctx, const void *buf, size_t count) {
 
     if(!ctx) return LIBLOSSLESS_ERR_NOCTX;
     switch(ctx->mode) {
@@ -116,8 +114,6 @@ ssize_t audio_write(JNIEnv *env, jobject obj, msm_ctx *ctx, const void *buf, siz
            return libmedia_write(ctx, buf, count);
 	case MODE_CALLBACK:
            return libmediacb_write(ctx, buf, count);
-        case MODE_JAVA:
-           return java_audio_write(env,obj,ctx, buf, count);
         default:
            break;
     }
@@ -324,7 +320,7 @@ void writePCM(byte pcm_arr[]);
 pcm_arr = new byte array of length "count"
 */
 
-
+#if 0
 ssize_t java_audio_write(JNIEnv *env, jobject obj, msm_ctx *ctx, const void *buf, size_t count) {
   if(!ctx) return -1;
 
@@ -370,7 +366,7 @@ ssize_t java_audio_write(JNIEnv *env, jobject obj, msm_ctx *ctx, const void *buf
 
   return count;
 }
-
+#endif
 
 
 

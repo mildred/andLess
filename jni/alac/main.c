@@ -189,7 +189,7 @@ JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_alacPlay(JNIEnv *env, jobject 
 
 	    if(n >= ctx->conf_size) {
 //__android_log_print(ANDROID_LOG_ERROR,"liblossless", "need write, %d >= %d, prev=%d", n, ctx->conf_size, prev_written);
-		if(prev_written && ctx->mode != MODE_CALLBACK && ctx->mode != MODE_JAVA) {
+		if(prev_written && ctx->mode != MODE_CALLBACK) {
                     gettimeofday(&tstop,0);
                     tminwrite = ((uint64_t)((uint64_t)prev_written)*1000000)/
                         ((uint64_t)(ctx->samplerate*ctx->channels*(ctx->bps/8)));
@@ -199,13 +199,13 @@ JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_alacPlay(JNIEnv *env, jobject 
 //__android_log_print(ANDROID_LOG_ERROR,"liblossless", "Slept %d ms, writing", (tminwrite-ttmp.tv_usec)/4000);
 		    }	
             	}
-		if(ctx->mode != MODE_CALLBACK && ctx->mode != MODE_JAVA) gettimeofday(&tstart,0);
+		if(ctx->mode != MODE_CALLBACK) gettimeofday(&tstart,0);
 		prev_written = 0;
 		p = ctx->wavbuf;
 		do {
                      pthread_mutex_lock(&ctx->mutex);
 	             if(ctx->fd < 0) k = 0; // we were closed from outside
-		     else k = audio_write(env,obj,ctx,p,ctx->conf_size);
+		     else k = audio_write(ctx,p,ctx->conf_size);
                      pthread_mutex_unlock(&ctx->mutex);
 		     if(k == 0)	break;
         	     if(k < ctx->conf_size) {

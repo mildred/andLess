@@ -70,7 +70,7 @@ void libmedia_stop(msm_ctx *ctx) {
   __android_log_print(ANDROID_LOG_INFO,"liblossless","libmetia_stop called, ctx=%p, track=%p", ctx, 
 		ctx ? ctx->track : 0);
   if(ctx && ctx->track) {
-#if 0
+#if 0 
 	((AudioTrack *) ctx->track)->stop();
   __android_log_print(ANDROID_LOG_INFO,"liblossless","libmetia_stop: audio track stopped!");
 	((AudioTrack *) ctx->track)->flush();

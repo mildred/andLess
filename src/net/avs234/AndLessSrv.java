@@ -74,6 +74,7 @@ public class AndLessSrv extends Service {
 	public native int []	extractFlacCUE(String file);
 	*/
 	
+		
 	// errors returned by xxxPlay functions
 	public static final int LIBLOSSLESS_ERR_NOCTX = 1;
 	public static final int LIBLOSSLESS_ERR_INV_PARM  =  2;
@@ -94,11 +95,12 @@ public class AndLessSrv extends Service {
 	// Actually, it's a pointer to struct msm_ctx, see native code.
 	// Used in all subsequent calls of native functions.
 	private static int ctx = 0;
-	
+		
 	public static final int MODE_NONE = 0;
 	public static final int MODE_DIRECT = 1; 
 	public static final int MODE_LIBMEDIA = 2;
-
+	public static final int MODE_CALLBACK = 3;
+	
 	// Ad hoc value. 0x2000 seems to be a maximum used by the driver. MSM datasheets needed. 
 	private int volume = 0x1000;
 	
@@ -260,7 +262,7 @@ public class AndLessSrv extends Service {
 			paused = false;	running = false; 
 			times = null;	names = null;
 			cup = null;		cur_mode = MODE_NONE;
-			driver_mode = MODE_LIBMEDIA;
+			driver_mode = MODE_CALLBACK;
 
 			if(path != null) dir = new String(path);
 			try {

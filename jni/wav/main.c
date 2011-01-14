@@ -157,7 +157,7 @@ JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_wavPlay(JNIEnv *env, jobject o
 	                close(ctx->fd); ctx->fd = -1;
 	                return 	LIBLOSSLESS_ERR_IO_READ;
 		}
-	   if(ctx->mode != MODE_CALLBACK && ctx->mode != MODE_JAVA) {
+	   if(ctx->mode != MODE_CALLBACK) {
 		gettimeofday(&tstop,0);
 		timersub(&tstop,&tstart,&ttmp);
 		if(tminwrite > ttmp.tv_usec) { 
@@ -174,7 +174,7 @@ JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_wavPlay(JNIEnv *env, jobject o
 		gettimeofday(&tstart,0);
 	   }
 		pthread_mutex_lock(&ctx->mutex);
-		i = audio_write(env,obj,ctx,buff,ctx->conf_size);
+		i = audio_write(ctx,buff,ctx->conf_size);
 		if(i < ctx->conf_size) {
 	            ctx->state = MSM_STOPPED;
                     pthread_mutex_unlock(&ctx->mutex);

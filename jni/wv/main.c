@@ -152,7 +152,7 @@ JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_wvPlay(JNIEnv *env, jobject ob
 	    }	
 	}
 
-	if(prev_written && ctx->mode != MODE_CALLBACK && ctx->mode != MODE_JAVA) {
+	if(prev_written && ctx->mode != MODE_CALLBACK) {
 	   tminwrite = ((uint64_t)((uint64_t)prev_written)*1000000)/((uint64_t)(samplerate*bps*nchans));
            gettimeofday(&tstop,0);
            timersub(&tstop,&tstart,&ttmp);
@@ -170,11 +170,11 @@ JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_wvPlay(JNIEnv *env, jobject ob
 #endif
         }
 
-        if(ctx->mode != MODE_CALLBACK && ctx->mode != MODE_JAVA) gettimeofday(&tstart,0);
+        if(ctx->mode != MODE_CALLBACK) gettimeofday(&tstart,0);
 	prev_written = nsamples*2*nchans;
 
 	pthread_mutex_lock(&ctx->mutex);
-	i = audio_write(env,obj,ctx,ctx->wavbuf,nsamples*2*nchans);
+	i = audio_write(ctx,ctx->wavbuf,nsamples*2*nchans);
         if(i != nsamples*2*nchans) {
             ctx->state = MSM_STOPPED;
             pthread_mutex_unlock(&ctx->mutex);
