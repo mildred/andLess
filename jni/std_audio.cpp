@@ -117,7 +117,7 @@ int libmediacb_start(msm_ctx *ctx, int channels, int samplerate) {
 	
   __android_log_print(ANDROID_LOG_INFO,"liblossless","libmediacb_start chans=%d rate=%d afd=%d atrack=%p",
                 channels, samplerate,ctx->afd,ctx->track);
-#if 1 
+#if 0 
    if(ctx->track && ctx->samplerate == samplerate && ctx->channels == channels) {
 	((AudioTrack *) ctx->track)->stop();
 	((AudioTrack *) ctx->track)->flush();
@@ -128,8 +128,8 @@ int libmediacb_start(msm_ctx *ctx, int channels, int samplerate) {
 #endif
 
    if(ctx->track) {
-	((AudioTrack *) ctx->track)->stop();
-	((AudioTrack *) ctx->track)->flush();
+//	((AudioTrack *) ctx->track)->stop();
+//	((AudioTrack *) ctx->track)->flush();
 	delete (AudioTrack *) ctx->track;
    }	
 

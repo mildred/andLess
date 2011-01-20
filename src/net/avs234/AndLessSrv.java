@@ -474,7 +474,7 @@ public class AndLessSrv extends Service {
 			public int getThreadId() {
 				return tid;
 			}
-		}
+		}		
 		public boolean stop() {
 			running = false;
 			log_msg("stop()");
