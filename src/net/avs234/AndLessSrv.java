@@ -2,10 +2,6 @@ package net.avs234;
 
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.lang.reflect.Field;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -13,18 +9,21 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.IBinder;
-import android.telephony.PhoneStateListener;
-import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 
 
 public class AndLessSrv extends Service {
@@ -115,12 +114,18 @@ public class AndLessSrv extends Service {
 	private void log_err(String msg) {
 		Log.e(getClass().getSimpleName(), msg);
 	}
+
+	// process headset insert/remove events
+	public static final int HANDLE_HEADSET_INSERT = 1;
+	public static final int HANDLE_HEADSET_REMOVE = 2;
+	
+	private static int headset_mode = 0;
 	
 	public static int curTrackLen = 0;
 	public static int curTrackStart = 0;
 	private static int last_cue_start = 0;
 	private static int total_cue_len = 0;
-		
+	
 	// Callback to be called from native code
 	
 	public static void updateTrackLen(int time) {
@@ -644,6 +649,7 @@ public class AndLessSrv extends Service {
 		public String  	get_cur_track_source()	{ try { return plist.files[plist.cur_pos]; } catch(Exception e) {return null;} }
 		public String  	get_cur_track_name()	{ try { return plist.names[plist.cur_pos]; } catch(Exception e) {return null;} }
 		public void		set_driver_mode(int m) 	{ plist.driver_mode = m; }
+		public void		set_headset_mode(int m)	{ headset_mode = m; }
 		public void 	registerCallback(IAndLessSrvCallback cb)   { if(cb != null) cBacks.register(cb); };
 		public void 	unregisterCallback(IAndLessSrvCallback cb) { if(cb != null) cBacks.unregister(cb); };
 	    public int []	get_cue_from_flac(String file) {return  extractFlacCUE(file); };
@@ -662,8 +668,8 @@ public class AndLessSrv extends Service {
 	public void onCreate() {
 		   	super.onCreate();
 		   	log_msg("onCreate()");
-           	TelephonyManager tmgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-	        tmgr.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+	        registerPhoneListener();
+	        registerHeadsetReciever();
 	        if(wakeLock == null) {
 	        	PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);
 	        	wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, this.getClass().getName());
@@ -678,10 +684,10 @@ public class AndLessSrv extends Service {
 	public void onDestroy() {
 			log_msg("onDestroy()");
 		//	cBacks.kill();
+			unregisterPhoneListener();
+			unregisterHeadsetReciever();
 			if(plist != null && plist.running) plist.stop();
 			if(ctx != 0) audioExit(ctx);
-			TelephonyManager tmgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-	        tmgr.listen(phoneStateListener, 0);
 	        if(wakeLock != null && wakeLock.isHeld()) wakeLock.release();
 	        if(nm != null) nm.cancel(NOTIFY_ID);
 	}	 
@@ -693,6 +699,51 @@ public class AndLessSrv extends Service {
 		return super.onUnbind(intent);
 	}
 
+	///////////////////////////////////////////////////////
+	//////////// Headset Connection Detection /////////////
+	
+	private BroadcastReceiver headsetReciever = new BroadcastReceiver() {
+		private boolean needResume = false;
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (isIntentHeadsetRemoved(intent)) {
+				log_msg("Headset Removed: " + intent.getAction());
+				if(plist != null && plist.running && !plist.paused) {
+					if(((headset_mode & HANDLE_HEADSET_REMOVE) != 0)) plist.pause();
+					needResume = true;
+				}	
+			} else if (isIntentHeadsetInserted(intent)) {
+				log_msg("Headset Inserted: " + intent.getAction());
+				if(needResume) {
+					if(plist != null && (headset_mode & HANDLE_HEADSET_INSERT) != 0) plist.resume();
+					needResume = false;
+				}
+			}
+		}
+		
+		private boolean isIntentHeadsetInserted(Intent intent) {
+			return ((intent.getAction().equalsIgnoreCase(Intent.ACTION_HEADSET_PLUG)
+					&& intent.getIntExtra("state", 0) != 0)
+					|| intent.getAction().equalsIgnoreCase(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
+		}
+		
+		private boolean isIntentHeadsetRemoved(Intent intent) {
+			return (intent.getAction().equalsIgnoreCase(Intent.ACTION_HEADSET_PLUG)
+					&& intent.getIntExtra("state", 0) == 0);
+		}
+	};
+	
+	private void registerHeadsetReciever() {
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(Intent.ACTION_HEADSET_PLUG);
+		filter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+		registerReceiver(headsetReciever, filter);
+	}
+	
+	private void unregisterHeadsetReciever() {
+		unregisterReceiver(headsetReciever);
+	}
+	
 	////////////////////////////////////////////////////////
 	//////// Pause when the phone rings, and resume after the call
 
@@ -713,6 +764,16 @@ public class AndLessSrv extends Service {
 	            }
 	     }
 	};
+	
+	private void registerPhoneListener() {
+		TelephonyManager tmgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+		tmgr.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+	}
+	
+	private void unregisterPhoneListener() {
+		TelephonyManager tmgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+		tmgr.listen(phoneStateListener, 0);
+	}
 
 	////////////////////////////////////////////////////
 	//////////  We need read-write access to this device

@@ -52,6 +52,16 @@ public class Preferences extends PreferenceActivity {
         book_mode.setTitle(R.string.strSaveBooks);
         book_mode.setKey("book_mode");
         launchPrefCat.addPreference(book_mode);
+
+        CheckBoxPreference hs_remove_mode = new CheckBoxPreference(this);
+        hs_remove_mode.setTitle(R.string.strHsRemove);
+        hs_remove_mode.setKey("hs_remove_mode");
+        launchPrefCat.addPreference(hs_remove_mode);
+
+        CheckBoxPreference hs_insert_mode = new CheckBoxPreference(this);
+        hs_insert_mode.setTitle(R.string.strHsInsert);
+        hs_insert_mode.setKey("hs_insert_mode");
+        launchPrefCat.addPreference(hs_insert_mode);
         
         PreferenceCategory andlessPrefCat = new PreferenceCategory(this);
         andlessPrefCat.setTitle(R.string.app_name);

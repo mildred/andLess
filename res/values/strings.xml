@@ -70,7 +70,7 @@
 <string name="strMplayerError">Media player error </string>
 <string name="strDriverMode">Direct hardware access</string>
 <string name="strSaveBooks">Auto-save bookmarks</string>
-<string name="strAbout">andLess Android player for lossless audio files built on Jan 20, 2011</string>
+<string name="strAbout">andLess Android player for lossless audio files built on Jan 21, 2011</string>
 <string name="strAbout1">About</string>
 <string name="strQuit">Quit</string>
 <string name="strHideExt">Hide filename extensions</string>
@@ -80,4 +80,6 @@
 <string name="strBadBook">Invalid bookmark file</string>
 <string name="strCueTrack">Track</string>
 <string name="strBSettings">Basic settings</string>
+<string name="strHsRemove">Pause on HS removed</string>
+<string name="strHsInsert">Resume on HS inserted</string>
 </resources>

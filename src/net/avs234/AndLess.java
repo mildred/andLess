@@ -917,6 +917,14 @@ public class AndLess extends Activity implements Comparator<File> {
 			} else {
 				prefs.shuffle = false;
 			}
+            prefs.headset_mode = 0;
+            if(settings.getBoolean("hs_remove_mode", false)) prefs.headset_mode |= AndLessSrv.HANDLE_HEADSET_REMOVE;
+            if(settings.getBoolean("hs_insert_mode", false)) prefs.headset_mode |= AndLessSrv.HANDLE_HEADSET_INSERT;
+            if(srv != null) try {
+            	srv.set_headset_mode(prefs.headset_mode);
+            } catch (RemoteException r) {
+            	log_err("remote exception while trying to set headset_mode");
+            }
         }
 
     	@Override
@@ -985,6 +993,7 @@ public class AndLess extends Activity implements Comparator<File> {
         	public boolean shuffle;
         	public boolean savebooks;
         	public int driver_mode;
+        	public int headset_mode;
         	public int last_played_pos;
         	public int last_played_time;
         	public void load() {
@@ -998,6 +1007,9 @@ public class AndLess extends Activity implements Comparator<File> {
                 last_played_time = shpr.getInt("last_played_time",0);
                 plist_path = shpr.getString("plist_path", Environment.getExternalStorageDirectory().toString());
                 plist_name = shpr.getString("plist_name", "Favorites");
+                headset_mode = 0;
+                if(shpr.getBoolean("hs_remove_mode", false)) headset_mode |= AndLessSrv.HANDLE_HEADSET_REMOVE;
+                if(shpr.getBoolean("hs_insert_mode", false)) headset_mode |= AndLessSrv.HANDLE_HEADSET_INSERT;
         	}
         
         	public void save() {
@@ -1006,6 +1018,8 @@ public class AndLess extends Activity implements Comparator<File> {
         	  	editor.putBoolean("shuffle", shuffle);
         	  	editor.putBoolean("save_books", savebooks);
         	  	editor.putInt("driver_mode", driver_mode);
+        	  	editor.putBoolean("hs_remove_mode", (headset_mode & AndLessSrv.HANDLE_HEADSET_REMOVE) != 0);
+        	  	editor.putBoolean("hs_insert_mode", (headset_mode & AndLessSrv.HANDLE_HEADSET_INSERT) != 0);
         	  	if(cur_path != null) editor.putString("last_path", cur_path.toString());
         	  	if(plist_path != null) editor.putString("plist_path", plist_path);
         	  	if(plist_name != null) editor.putString("plist_name", plist_name);
