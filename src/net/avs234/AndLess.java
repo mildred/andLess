@@ -122,6 +122,9 @@ public class AndLess extends Activity implements Comparator<File> {
     			msg.setData(data);
     			hdl.sendMessage(msg);
     		}
+    		public void playItemPaused(boolean paused) {
+    			pauseResumeHandler.sendEmptyMessage(paused ? 1 : 0);
+    		}
     	};
     	
     	IBinder.DeathRecipient bdeath = new IBinder.DeathRecipient() {
@@ -884,7 +887,26 @@ public class AndLess extends Activity implements Comparator<File> {
                 showMsg(curfile);
       	  }
       };
-    	      
+    	     
+      Handler pauseResumeHandler = new Handler() {
+		private String now_playing = null;
+		@Override
+		public void handleMessage(Message msg) {
+			super.handleMessage(msg);
+			switch(msg.what) {
+				case 0:
+					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_pause));
+					if(now_playing != null) getWindow().setTitle(now_playing);
+					break;
+				case 1:	
+					now_playing = curWindowTitle;
+					buttPause.setBackgroundDrawable(getResources().getDrawable(R.drawable.s_play));
+					getWindow().setTitle(getString(R.string.strPaused));
+					break;
+			}
+		}
+      };
+      
     	////////////////////////////////////////////////////////////////
     	///////////////////////// Entry point //////////////////////////
     	////////////////////////////////////////////////////////////////

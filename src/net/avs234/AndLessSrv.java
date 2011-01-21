@@ -159,6 +159,18 @@ public class AndLessSrv extends Service {
 	    cBacks.finishBroadcast();
 	}
 
+	private void informPauseResume(boolean pause) {
+		final int k = cBacks.beginBroadcast();
+		for (int i=0; i < k; i++) {
+	         try { 
+	        	 cBacks.getBroadcastItem(i).playItemPaused(pause);
+	         } catch (RemoteException e) { 
+	        	 log_err("remote exception in informPauseResume(): " + e.toString());
+	        	 break;
+	         }
+	    }
+	    cBacks.finishBroadcast();
+	}
 	
 	private MediaPlayer mplayer = null;
 	private Object mplayer_lock= new Object();
@@ -709,13 +721,19 @@ public class AndLessSrv extends Service {
 			if (isIntentHeadsetRemoved(intent)) {
 				log_msg("Headset Removed: " + intent.getAction());
 				if(plist != null && plist.running && !plist.paused) {
-					if(((headset_mode & HANDLE_HEADSET_REMOVE) != 0)) plist.pause();
+					if(((headset_mode & HANDLE_HEADSET_REMOVE) != 0)) {
+						plist.pause();
+						informPauseResume(true);
+					}
 					needResume = true;
 				}	
 			} else if (isIntentHeadsetInserted(intent)) {
 				log_msg("Headset Inserted: " + intent.getAction());
 				if(needResume) {
-					if(plist != null && (headset_mode & HANDLE_HEADSET_INSERT) != 0) plist.resume();
+					if(plist != null && (headset_mode & HANDLE_HEADSET_INSERT) != 0) {
+						plist.resume();
+						informPauseResume(false);
+					}
 					needResume = false;
 				}
 			}
@@ -754,11 +772,15 @@ public class AndLessSrv extends Service {
 	            if (state == TelephonyManager.CALL_STATE_RINGING || state == TelephonyManager.CALL_STATE_OFFHOOK) {
 	            	if(plist != null && plist.running && !plist.paused) {
 	            		plist.pause();	
+	            		informPauseResume(true);
 	            		needResume = true;
 	            	}
 	            } else if (state == TelephonyManager.CALL_STATE_IDLE) {
 	            	if(needResume) {
-	            		if(plist != null) plist.resume();
+	            		if(plist != null) {
+	            			plist.resume();
+	            			informPauseResume(false);
+	            		}
 	            		needResume = false;
 	            	}
 	            }
