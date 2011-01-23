@@ -2,7 +2,12 @@
 #include <jni.h>
 #include <utils/String8.h>
 #include <android/log.h>
+#if 1 
 #include <media/AudioTrack.h>
+#else
+#include <media/AudioTrack9.h>
+#endif
+
 #include "main.h"
 #include "msm_audio.h"
 #include "std_audio.h"

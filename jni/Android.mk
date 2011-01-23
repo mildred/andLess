@@ -17,6 +17,5 @@ LOCAL_SRC_FILES :=  main.c std_audio.cpp
 LOCAL_ARM_MODE := arm
 LOCAL_LDLIBS := -llog \
  $(LOCAL_PATH)/Android/lib/libutils.so $(LOCAL_PATH)/Android/lib/libmedia.so
-# $(call host-path, $(LOCAL_PATH)/Android/lib/libutils.so) $(call host-path, $(LOCAL_PATH)/Android/lib/libmedia.so)
 
 include $(BUILD_SHARED_LIBRARY)

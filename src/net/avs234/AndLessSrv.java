@@ -726,7 +726,7 @@ public class AndLessSrv extends Service {
 						informPauseResume(true);
 					}
 					needResume = true;
-				}	
+				}
 			} else if (isIntentHeadsetInserted(intent)) {
 				log_msg("Headset Inserted: " + intent.getAction());
 				if(needResume) {
@@ -740,14 +740,14 @@ public class AndLessSrv extends Service {
 		}
 		
 		private boolean isIntentHeadsetInserted(Intent intent) {
-			return ((intent.getAction().equalsIgnoreCase(Intent.ACTION_HEADSET_PLUG)
-					&& intent.getIntExtra("state", 0) != 0)
-					|| intent.getAction().equalsIgnoreCase(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
+			return (intent.getAction().equalsIgnoreCase(Intent.ACTION_HEADSET_PLUG)
+					&& intent.getIntExtra("state", 0) != 0);
 		}
 		
 		private boolean isIntentHeadsetRemoved(Intent intent) {
-			return (intent.getAction().equalsIgnoreCase(Intent.ACTION_HEADSET_PLUG)
-					&& intent.getIntExtra("state", 0) == 0);
+			return ((intent.getAction().equalsIgnoreCase(Intent.ACTION_HEADSET_PLUG)
+					&& intent.getIntExtra("state", 0) == 0) 
+					|| intent.getAction().equalsIgnoreCase(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
 		}
 	};
 	

@@ -198,6 +198,7 @@ public class AndLess extends Activity implements Comparator<File> {
     					} else cBack.playItemChanged(true,getString(R.string.strStopped));
     				}
     				srv.registerCallback(cBack);
+    				update_headset_mode(null);
     			} catch(RemoteException e) {log_msg("remote exception in onServiceConnected: " + e.toString()); }
     		//	Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
     		}
@@ -939,7 +940,12 @@ public class AndLess extends Activity implements Comparator<File> {
 			} else {
 				prefs.shuffle = false;
 			}
-            prefs.headset_mode = 0;
+            update_headset_mode(settings);
+        }
+
+        void update_headset_mode(SharedPreferences settings) {
+        	if(settings == null) settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+			prefs.headset_mode = 0;
             if(settings.getBoolean("hs_remove_mode", false)) prefs.headset_mode |= AndLessSrv.HANDLE_HEADSET_REMOVE;
             if(settings.getBoolean("hs_insert_mode", false)) prefs.headset_mode |= AndLessSrv.HANDLE_HEADSET_INSERT;
             if(srv != null) try {
@@ -1611,7 +1617,7 @@ public class AndLess extends Activity implements Comparator<File> {
     	    }
   			
     	}
-
+    	
     	/////////////////////////////////////////////////
     	////////////// Playlist files ///////////////////
 
