@@ -422,10 +422,12 @@ public class AndLessSrv extends Service {
 							log_msg("track name = " + names[cur_pos]);
 							if(cur_pos + 1 < files.length) {
 								informTrack(names[cur_pos],false);
-								curTrackLen = times[cur_pos+1]-times[cur_pos]; // native thread won't update this track length but will save total_cue_len  
-								last_cue_start = -1;						   // so that we'll be able to update the last track length in due time from CueUpdater 
-								cup = new CueUpdater();
-								cup.schedule((times[cur_pos+1] - times[cur_pos])*1000 - cur_start);
+								if(times[cur_pos+1] > times[cur_pos]) {
+									curTrackLen = times[cur_pos+1]-times[cur_pos]; // native thread won't update this track length but will save total_cue_len  
+									last_cue_start = -1;						   // so that we'll be able to update the last track length in due time from CueUpdater 
+									cup = new CueUpdater();
+									cup.schedule((times[cur_pos+1] - times[cur_pos])*1000 - cur_start);
+								}
 							} else {	// last CUE track				
 								informTrack(names[cur_pos],false);	
 								last_cue_start = times[cur_pos]; // native thread will subtract this from the total cue length 
