@@ -795,8 +795,8 @@ public class AndLess extends Activity implements Comparator<File> {
 									//	pBar.setProgress(srv.get_cur_seconds() - AndLessSrv.curTrackStart);
 						   				int progress = srv.get_cur_seconds() - srv.get_cur_track_start();
 						   				if(progress > 0) pBar.setProgress(progress);
-						   				String sTime = (srv.get_cur_seconds() < 3600) ? String.format("%d:%02d", srv.get_cur_seconds()/60, srv.get_cur_seconds() % 60) 
-												:	String.format("%d:%02d:%02d", srv.get_cur_seconds()/3600, (srv.get_cur_seconds() % 3600)/60, srv.get_cur_seconds() % 60);
+						   				String sTime = (srv.get_cur_seconds() < 3600) ? String.format("%d:%02d", progress/60, progress % 60) 
+												:	String.format("%d:%02d:%02d", progress/3600, (progress % 3600)/60, progress % 60);
 						   				nowTime.setText(sTime);
 									} catch (Exception e) { 
 										log_err("exception 1 in progress update handler: " + e.toString()); 

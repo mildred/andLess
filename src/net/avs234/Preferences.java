@@ -43,10 +43,10 @@ public class Preferences extends PreferenceActivity {
         shuffle_mode.setKey("shuffle_mode");
         launchPrefCat.addPreference(shuffle_mode);
         
-        CheckBoxPreference driver_mode = new CheckBoxPreference(this);
+      /*  CheckBoxPreference driver_mode = new CheckBoxPreference(this);
         driver_mode.setTitle(R.string.strDriverMode);
         driver_mode.setKey("driver_mode");
-        launchPrefCat.addPreference(driver_mode);
+        launchPrefCat.addPreference(driver_mode); */
         
         CheckBoxPreference book_mode = new CheckBoxPreference(this);
         book_mode.setTitle(R.string.strSaveBooks);

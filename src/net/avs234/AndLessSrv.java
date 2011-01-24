@@ -313,10 +313,10 @@ public class AndLessSrv extends Service {
 				public void run() {
 					cur_pos++; cur_start = 0;
 					if(cur_pos < names.length && names[cur_pos] != null) {
-						log_msg("track name = " + names[cur_pos]);
 						if(cur_pos + 1 < files.length) curTrackLen = times[cur_pos+1] - times[cur_pos];
 						else curTrackLen = total_cue_len - times[cur_pos];
 						curTrackStart = getCurPosition(); // audioGetCurPosition(ctx);
+						log_msg("track name = " + names[cur_pos] + ", curTrackLen=" + curTrackLen + ", curTrackStart=" + curTrackStart);
 						informTrack(names[cur_pos],false);
 					}
 					if(cur_pos + 1 < names.length) schedule((times[cur_pos+1] - times[cur_pos])*1000);
@@ -426,7 +426,7 @@ public class AndLessSrv extends Service {
 									curTrackLen = times[cur_pos+1]-times[cur_pos]; // native thread won't update this track length but will save total_cue_len  
 									last_cue_start = -1;						   // so that we'll be able to update the last track length in due time from CueUpdater 
 									cup = new CueUpdater();
-									cup.schedule((times[cur_pos+1] - times[cur_pos])*1000 - cur_start);
+									cup.schedule((times[cur_pos+1] - times[cur_pos])*1000 - cur_start*1000);
 								}
 							} else {	// last CUE track				
 								informTrack(names[cur_pos],false);	
