@@ -222,15 +222,10 @@ JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_wvPlay(JNIEnv *env, jobject ob
 
 JNIEXPORT jint JNICALL Java_com_skvalex_amplayer_wvDuration(JNIEnv *env, jobject obj, msm_ctx* ctx, jstring jfile) {
 	const char *file = (*env)->GetStringUTFChars(env,jfile,NULL);
-	    int i, k;
 	    WavpackContext *wpc;
 	    char error [80];
 	    int bps, nchans, samplerate;
-	    int32_t * temp_buffer;
 	//    fd_set fds;
-	    struct timeval tstart, tstop, ttmp; // tstart -> time of the last write.
-	    useconds_t  tminwrite;
-	    int prev_written = 0;
 	    uint32_t num_samples;
 	#ifdef DBG_TIME
 	     uint64_t total_tminwrite = 0, total_ttmp = 0, total_sleep = 0;

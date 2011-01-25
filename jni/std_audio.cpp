@@ -2,7 +2,8 @@
 #include <jni.h>
 #include <utils/String8.h>
 #include <android/log.h>
-#if 1 
+
+#ifndef BUILD_GINGER 
 #include <media/AudioTrack.h>
 #else
 #include <media/AudioTrack9.h>
@@ -10,6 +11,7 @@
 
 #include "main.h"
 #include "msm_audio.h"
+#define FROM_ATRACK_CODE 1
 #include "std_audio.h"
 
 

@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <jni.h>
 #include <pthread.h>
+#include <dlfcn.h>
 #include <android/log.h>
 #include "main.h"
 #include "msm_audio.h"
@@ -202,6 +203,39 @@ JNIEXPORT jboolean JNICALL Java_net_avs234_AndLessSrv_audioSetVolume(JNIEnv *env
     return true;	
 }
 
+
+static void *libhandle = 0;
+
+static jboolean libinit(JNIEnv *env, jobject obj, jint sdk) {
+     __android_log_print(ANDROID_LOG_INFO,"liblossless","libinit: sdk=%d",sdk);
+    if(!libhandle) {
+        if(sdk > 8) libhandle = dlopen("/data/data/net.avs234/lib/libatrack9.so", RTLD_NOW);
+        else libhandle = dlopen("/data/data/net.avs234/lib/libatrack8.so", RTLD_NOW);
+	if(libhandle) {
+		libmedia_pause = (typeof(libmedia_pause)) dlsym(libhandle,"libmedia_pause");
+		libmedia_resume = (typeof(libmedia_resume)) dlsym(libhandle,"libmedia_resume");
+		libmedia_start = (typeof(libmedia_start)) dlsym(libhandle,"libmedia_start");
+		libmedia_stop = (typeof(libmedia_stop)) dlsym(libhandle,"libmedia_stop");
+		libmedia_write = (typeof(libmedia_write)) dlsym(libhandle,"libmedia_write");
+		libmediacb_start = (typeof(libmediacb_start)) dlsym(libhandle,"libmediacb_start");
+		libmediacb_stop = (typeof(libmediacb_stop)) dlsym(libhandle,"libmediacb_stop");
+		libmediacb_write = (typeof(libmediacb_write)) dlsym(libhandle,"libmediacb_write");
+	}
+    }
+    __android_log_print(ANDROID_LOG_INFO,"liblossless","libinit: handle=%p",libhandle);
+    return libhandle != 0;
+}
+
+static jboolean libexit(JNIEnv *env, jobject obj) {
+   int ret = 0;
+     __android_log_print(ANDROID_LOG_INFO,"liblossless","libexit");
+    if(libhandle) {
+        ret = dlclose(libhandle) ? 0 : 1;
+        libhandle = 0;
+    }
+    return ret;
+}
+
 static JavaVM *gvm;
 static jobject giface; 
 
@@ -266,6 +300,9 @@ static JNINativeMethod methods[] = {
  { "extractFlacCUE", "(Ljava/lang/String;)[I", (void *) extract_flac_cue },
  { "wvDuration", "(ILjava/lang/String;)I", (void *) Java_com_skvalex_amplayer_wvDuration },
  { "apeDuration", "(ILjava/lang/String;)I", (void *) Java_com_skvalex_amplayer_apeDuration },
+ { "libInit", "(I)Z", (void *) libinit },
+ { "libExit", "()Z", (void *) libexit },
+
 };
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {

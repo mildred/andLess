@@ -448,28 +448,8 @@ JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_apePlay(JNIEnv *env, jobject o
 
 JNIEXPORT jint JNICALL Java_com_skvalex_amplayer_apeDuration(JNIEnv *env, jobject obj, msm_ctx* ctx, jstring jfile) {
 
-    int currentframe, nblocks, bytesconsumed;
-    int bytesinbuffer, blockstodecode, firstbyte;
-    int i = 0, n, bytes_to_write;
-
-    int16_t  sample16;
-    int32_t  sample32;
-
     const char *file = (*env)->GetStringUTFChars(env,jfile,NULL);
-
-    unsigned char inbuffer[INPUT_CHUNKSIZE];
-    int32_t decoded0[BLOCKS_PER_LOOP];
-    int32_t decoded1[BLOCKS_PER_LOOP];
-
-    unsigned char *p;
-
-    struct timeval tstart, tstop, ttmp; // tstart -> time of the last write.
-    useconds_t  tminwrite;
-
     struct ape_ctx_t ape_ctx;
-    int prev_written = 0;
-
-    uint32_t samplestoskip;
 
 #ifdef DBG_TIME
         uint64_t total_tminwrite = 0, total_ttmp = 0, total_sleep = 0;
@@ -492,7 +472,6 @@ JNIEXPORT jint JNICALL Java_com_skvalex_amplayer_apeDuration(JNIEnv *env, jobjec
 	        return -1;
 	}
 
-	   uint32_t filepos, newframe, start_sample;
 
 	        ape_ctx.seektable = (uint32_t *) malloc(ape_ctx.seektablelength);
 	        if(!ape_ctx.seektable) {

@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Process;
@@ -52,6 +53,9 @@ public class AndLessSrv extends Service {
 	
 	public static native int		wvDuration(int ctx,String file);
 	public static native int		apeDuration(int ctx,String file);
+	
+	public static native boolean	libInit(int sdk);
+	public static native boolean	libExit();
 	
 	/*
 	public native int 		audioInit(int ctx, int mode);	
@@ -692,8 +696,12 @@ public class AndLessSrv extends Service {
 	        plist = new AndLessSrv.playlist();
 	        if(nm == null) nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 	        Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
+	        if(!libInit(Build.VERSION.SDK_INT)) {
+	        	log_err("cannot initialize atrack library");
+	        	stopSelf();
+	        }
 	}
-	
+		
 	@Override
 	public void onDestroy() {
 			log_msg("onDestroy()");
@@ -704,6 +712,7 @@ public class AndLessSrv extends Service {
 			if(ctx != 0) audioExit(ctx);
 	        if(wakeLock != null && wakeLock.isHeld()) wakeLock.release();
 	        if(nm != null) nm.cancel(NOTIFY_ID);
+	        libExit();
 	}	 
 	
 	@Override
