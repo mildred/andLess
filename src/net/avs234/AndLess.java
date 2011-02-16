@@ -19,7 +19,9 @@ import java.util.TimerTask;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -36,6 +38,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -435,12 +438,13 @@ public class AndLess extends Activity implements Comparator<File> {
 
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				try {
+					int progress = seekBar.getProgress()*1000;
 					if(srv.get_cur_mode() == 0) {
-						srv.seek_to(seekBar.getProgress()*1000);
+						srv.seek_to(progress);
 					} else {
-						srv.play(srv.get_cur_pos(), seekBar.getProgress());
+						srv.play(srv.get_cur_pos(), progress);
 					}
-				} catch (RemoteException e) {
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -1909,5 +1913,38 @@ public class AndLess extends Activity implements Comparator<File> {
 			return (bytes[0] == -1 && bytes[1] == -2)
 					|| (bytes[0] == -2 && bytes[1] == -1);
     	}
+
+    	///////////////////////////////////////////////////////
+    	////////////////// Media button events ////////////////
+    	
+    	public final class MediaButtonReceiver extends BroadcastReceiver {
+    		@Override
+    		public void onReceive(Context context, Intent intent) {
+    			Log.i("AndLessSrv.MediaButtonReceiver", "button event: " + intent.getStringExtra(Intent.EXTRA_KEY_EVENT));
+    			KeyEvent event = (KeyEvent)  intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+    			if(event == null || event.getAction() != KeyEvent.ACTION_DOWN) return;
+  	          try {
+  	        	 switch(event.getKeyCode()) {
+    	        	case KeyEvent.KEYCODE_MEDIA_STOP:
+    	        		if(srv!= null) srv.pause();
+    	        		break;
+            		case KeyEvent.KEYCODE_HEADSETHOOK:
+            		case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+            			if(srv!= null) {
+            				if(srv.is_running() && !srv.is_paused()) srv.pause();
+            				else srv.resume();
+            			}
+            			break;
+            		case KeyEvent.KEYCODE_MEDIA_NEXT:
+            			if(srv != null) srv.play_next();
+            			break;
+            		case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+            			if(srv != null) srv.play_prev();
+            			break;
+  	        	 }
+    	      } catch(Exception e) {}   
+    		}
+    	}	
+
 }
 

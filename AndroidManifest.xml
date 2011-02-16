@@ -14,10 +14,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-       <service
+       
+       	<service
        		android:exported = "true"
        		android:name=".AndLessSrv"
-       		android:process=":remote" />
+       		android:process=":remote"/>
+       
+	    <receiver android:name=".AndLess.MediaButtonReceiver">
+    	   	<intent-filter android:priority="83647">
+          		<action android:name="android.intent.action.MEDIA_BUTTON" />
+           	</intent-filter>
+		</receiver>
+
 		<activity android:name=".Preferences"
 				  android:launchMode="singleTop"
 				  android:configChanges="keyboardHidden|orientation"
@@ -26,6 +34,7 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
+        
     </application>
     <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="6"/>
 	<supports-screens />
