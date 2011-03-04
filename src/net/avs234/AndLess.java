@@ -438,11 +438,10 @@ public class AndLess extends Activity implements Comparator<File> {
 
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				try {
-					int progress = seekBar.getProgress()*1000;
 					if(srv.get_cur_mode() == 0) {
-						srv.seek_to(progress);
+						srv.seek_to(seekBar.getProgress()*1000);
 					} else {
-						srv.play(srv.get_cur_pos(), progress);
+						srv.play(srv.get_cur_pos(), seekBar.getProgress());
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block

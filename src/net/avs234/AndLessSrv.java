@@ -697,7 +697,8 @@ public class AndLessSrv extends Service {
 	        plist = new AndLessSrv.playlist();
 	        if(nm == null) nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 	        Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
-	        if(!libInit(Build.VERSION.SDK_INT)) {
+	        //if(!libInit(Build.VERSION.SDK_INT)) {
+	        if(!libInit(Integer.parseInt(Build.VERSION.SDK))) {	        	
 	        	log_err("cannot initialize atrack library");
 	        	stopSelf();
 	        }
