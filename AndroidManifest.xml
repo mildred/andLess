@@ -15,6 +15,7 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+                <action android:name="net.avs234.AndLessSrv.VIEW_INTENT" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="application/ogg" android:scheme="file" />
                 <data android:mimeType="audio/flac" android:scheme="file" />

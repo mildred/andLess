@@ -1009,7 +1009,7 @@ public class AndLess extends Activity implements Comparator<File> {
 
             if(conn == null) conn = new_connection();
 
-            if(ii.getAction().equals(Intent.ACTION_VIEW)) { 
+            if(ii.getAction().equals(Intent.ACTION_VIEW) || ii.getAction().equals(AndLessSrv.ACTION_VIEW)) { 
             	try {
             		startfile = Uri.decode(ii.getDataString());
             		if(startfile != null && startfile.startsWith("file:///")) startfile = startfile.substring(7);

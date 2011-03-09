@@ -31,4 +31,5 @@ interface IAndLessSrv {
 	void registerCallback(IAndLessSrvCallback cb);
     void unregisterCallback(IAndLessSrvCallback cb);
     int []	get_cue_from_flac(in String file);
+    void	launch(in String path);
 }

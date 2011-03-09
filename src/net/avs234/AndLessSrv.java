@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -123,6 +124,8 @@ public class AndLessSrv extends Service {
 	// process headset insert/remove events
 	public static final int HANDLE_HEADSET_INSERT = 1;
 	public static final int HANDLE_HEADSET_REMOVE = 2;
+	
+	public static final String ACTION_VIEW = "andLess_view";
 	
 	private static int headset_mode = 0;
 	
@@ -672,7 +675,13 @@ public class AndLessSrv extends Service {
 		public void 	registerCallback(IAndLessSrvCallback cb)   { if(cb != null) cBacks.register(cb); };
 		public void 	unregisterCallback(IAndLessSrvCallback cb) { if(cb != null) cBacks.unregister(cb); };
 	    public int []	get_cue_from_flac(String file) {return  extractFlacCUE(file); };
+	    public void		launch(String path) { if(launcher != null) launcher.launch(path);  };
 	};
+	
+	private class Launcher {
+		void launch(String path) {	startActivity((new Intent()).setAction(AndLessSrv.ACTION_VIEW).setData(Uri.fromFile(new File(path))));	}
+	}
+	static Launcher launcher = null;
 	
 	///////////////////////////////////////////////////////
 	///////////////////// Overrides ///////////////////////
@@ -695,6 +704,7 @@ public class AndLessSrv extends Service {
 	        	wakeLock.setReferenceCounted(false);
 	        }
 	        plist = new AndLessSrv.playlist();
+	        launcher = new Launcher();
 	        if(nm == null) nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 	        Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
 	        //if(!libInit(Build.VERSION.SDK_INT)) {
