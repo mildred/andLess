@@ -28,6 +28,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -105,7 +106,9 @@ public class AndLess extends Activity implements Comparator<File> {
     	private static final String resume_bmark = "/resume.bmark";
         // Interface which is an entry point to server functions. Returned upon connection to the server. 
         private IAndLessSrv srv = null;
-
+        // If we're called through intent
+        private String startfile = null;
+        
     	// Callback for server to report track/state changes.  Invokes the above handler to set window title. 
     	private IAndLessSrvCallback cBack = new IAndLessSrvCallback.Stub() { 
     		public void playItemChanged(boolean error, String name) {
@@ -163,7 +166,29 @@ public class AndLess extends Activity implements Comparator<File> {
         		//		errExit(getString(R.string.strSrvInitFail));
     			//	}
         			obj.linkToDeath(bdeath,0);
-    				String s = srv.get_cur_dir();
+    				if(startfile != null) {	// we've been called via intent.VIEW
+    					log_msg("connection using "+startfile);
+    					File f = new File(startfile);
+    					if(f.exists() && !f.isDirectory() && hasAudioExt(startfile)) {
+    						int i = startfile.lastIndexOf('/');
+							f = new File(startfile.substring(0, i));
+    						if(setAdapter(f) && i > 0) {
+    							log_msg("starting from \"" + startfile + "\" in \""  + f.toString() + "\"");
+    							srv.registerCallback(cBack);
+    		    				update_headset_mode(null);
+    		    				playDir(f,startfile);
+    							return;
+    						}	
+    					} else if(f.exists() && (f.isDirectory() || hasPlistExt(startfile) || hasCueExt(startfile))) {
+    						if(setAdapter(f)) {
+    		    				srv.registerCallback(cBack);
+    		    				update_headset_mode(null);
+    							playPath(f);
+    							return;
+    						}
+    					}
+    				}
+        			String s = srv.get_cur_dir();
     				if(s != null) {
     					File f = new File(s);
     					if(f.exists() && (f.isDirectory() || hasPlistExt(s) || hasCueExt(s))) {
@@ -963,6 +988,7 @@ public class AndLess extends Activity implements Comparator<File> {
 
     		super.onCreate(savedInstanceState);
 
+            Intent ii = getIntent();
     		prefs = new Prefs();
             prefs.load();
 
@@ -982,10 +1008,19 @@ public class AndLess extends Activity implements Comparator<File> {
             else log_msg("started service");
 
             if(conn == null) conn = new_connection();
+
+            if(ii.getAction().equals(Intent.ACTION_VIEW)) { 
+            	try {
+            		startfile = Uri.decode(ii.getDataString());
+            		if(startfile != null && startfile.startsWith("file:///")) startfile = startfile.substring(7);
+            		else startfile = null;
+            	} catch (Exception s) {  startfile = null; } 
+            } else startfile = null;
             
             if(!bindService(intie, conn,0)) log_err("cannot bind service");
             else log_msg("service bound");
             if((new Build()).DEVICE.compareTo("GT-I5700") == 0 && (new Build.VERSION()).SDK.compareTo("7") == 0) samsung = true;
+            
     	}
 
     	@Override
@@ -1492,12 +1527,12 @@ public class AndLess extends Activity implements Comparator<File> {
     	// Playback starts immediately without changing the current directory.
     	
     	private boolean playPath(File fpath) {
-    		if(fpath.isDirectory()) return playDir(fpath); 
+    		if(fpath.isDirectory()) return playDir(fpath, null); 
     		else if(hasPlistExt(fpath)) return playPlaylist(fpath);
     		else if(hasCueExt(fpath)) return playCue(fpath);
     		return false;
     	}
-        	
+    	
     	/////////////////////////////////////////////////
     	////////////// Ordinary directories /////////////
 
@@ -1543,19 +1578,22 @@ public class AndLess extends Activity implements Comparator<File> {
 			return r;
     	}
    	
-    	private boolean playDir(File fpath) {
+    	private boolean playDir(File fpath, String filename) {	// filename is with path 
+
+    		int k = 0;
     		parsed_dir r = parseDir(fpath);
-    		
     		if(r == null) {
 				Toast.makeText(getApplicationContext(), R.string.strNoFiles, Toast.LENGTH_SHORT).show();
 				return false;
 			}
-			
     		ArrayList<String> filly = new ArrayList<String>();
-			for(int i = r.dirs + r.cues; i < r.filez.length; i++) filly.add(r.filez[i].toString());
-			
-			return playContents(fpath.toString(),filly,null,null,0,0);
+			for(int i = r.dirs + r.cues; i < r.filez.length; i++) {
+				filly.add(r.filez[i].toString());
+				if(filename != null && r.filez[i].toString().equals(filename)) k = i - r.dirs - r.cues;
+			}
+			return playContents(fpath.toString(),filly,null,null,k,0);
     	}
+    	
 
     	private ArrayList<String> recurseDir(File fpath) {
     		if(!fpath.isDirectory()) return null;

@@ -13,6 +13,21 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/ogg" android:scheme="file" />
+                <data android:mimeType="audio/flac" android:scheme="file" />
+                <data android:mimeType="audio/ape" android:scheme="file" />
+				<data android:mimeType="audio/wv" android:scheme="file" />
+				<data android:mimeType="audio/mp4" android:scheme="file" />
+				<data android:mimeType="audio/mp3" android:scheme="file" />
+				<data android:mimeType="audio/mpc" android:scheme="file" />
+                <data android:mimeType="audio/ogg" android:scheme="file" />
+                <data android:mimeType="audio/x-wav" android:scheme="file" />
+                <data android:mimeType="audio/wav" android:scheme="file" />
+            	<data android:mimeType="audio/cue" android:scheme="file" />
+            </intent-filter>
         </activity>
        
        	<service
