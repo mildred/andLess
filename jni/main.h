@@ -29,13 +29,14 @@ typedef struct {
    int  channels, samplerate, bps, written;
    int  cbstart, cbend;	
    pthread_mutex_t mutex, cbmutex;
-   pthread_cond_t  cbcond;
+   pthread_cond_t  cbcond, cbdone;
 } msm_ctx;
 
 extern int  audio_start(msm_ctx *ctx, int channels, int samplerate);
 extern void audio_stop(msm_ctx *ctx);
 extern ssize_t  audio_write(msm_ctx *ctx, const void *buf, size_t count);
 extern void update_track_time(JNIEnv *env, jobject obj, int time);
+extern void audio_wait_done(msm_ctx *ctx);
 
 extern JNIEXPORT jint	  JNICALL Java_net_avs234_AndLessSrv_audioInit(JNIEnv *env, jobject obj, msm_ctx *prev_ctx, jint mode);
 extern JNIEXPORT jboolean JNICALL Java_net_avs234_AndLessSrv_audioExit(JNIEnv *env, jobject obj, msm_ctx *ctx);

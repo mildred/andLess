@@ -982,7 +982,7 @@ public class AndLess extends Activity implements Comparator<File> {
             	log_err("remote exception while trying to set headset_mode");
             }
         }
-
+        
     	@Override
         public void onCreate(Bundle savedInstanceState) {
 

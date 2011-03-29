@@ -70,7 +70,7 @@
 <string name="strMplayerError">Ошибка медиа-плеера</string>
 <string name="strDriverMode">Прямой доступ к драйверу</string>
 <string name="strSaveBooks">Автосохранение закладок</string>
-<string name="strAbout">Android плеер andLess для звуковых файлов без потерь. Дата сборки Mar  9, 2011</string>
+<string name="strAbout">Android плеер andLess для звуковых файлов без потерь. Дата сборки Mar 29, 2011</string>
 <string name="strAbout1">О программе</string>
 <string name="strQuit">Выход</string>
 <string name="strHideExt">Не показывать расширений файлов</string>

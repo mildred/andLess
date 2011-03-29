@@ -235,5 +235,8 @@ done:
 	     pthread_mutex_unlock(&ctx->mutex);
 	}
 	free(inputbuf);
+
+        audio_wait_done(ctx);
+
    return retval;
 }

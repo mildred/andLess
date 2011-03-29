@@ -691,7 +691,7 @@ public class AndLessSrv extends Service {
 		log_msg("onBind()");	
 		return binder;
 	}
-	
+
 	@Override
 	public void onCreate() {
 		   	super.onCreate();

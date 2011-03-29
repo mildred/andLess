@@ -105,6 +105,10 @@ void audio_stop(msm_ctx *ctx) {
     pthread_mutex_unlock(&ctx->mutex);
 }
 
+void audio_wait_done(msm_ctx *ctx) {
+    if(ctx->mode == MODE_CALLBACK) libmediacb_wait_done(ctx);	
+}
+
 ssize_t audio_write(msm_ctx *ctx, const void *buf, size_t count) {
 
     if(!ctx) return LIBLOSSLESS_ERR_NOCTX;
@@ -174,6 +178,7 @@ JNIEXPORT jint JNICALL Java_net_avs234_AndLessSrv_audioInit(JNIEnv *env, jobject
 	pthread_mutex_init(&ctx->mutex,0);
 	pthread_mutex_init(&ctx->cbmutex,0);
 	pthread_cond_init(&ctx->cbcond,0);
+	pthread_cond_init(&ctx->cbdone,0);
     }	
     ctx->mode = mode;
     ctx->state = MSM_STOPPED;
@@ -188,6 +193,7 @@ JNIEXPORT jboolean JNICALL Java_net_avs234_AndLessSrv_audioExit(JNIEnv *env, job
     pthread_mutex_destroy(&ctx->mutex);
     pthread_mutex_destroy(&ctx->cbmutex);
     pthread_cond_destroy(&ctx->cbcond);
+    pthread_cond_destroy(&ctx->cbdone);
     if(ctx->wavbuf) free(ctx->wavbuf);
     if(ctx->cbbuf) free(ctx->cbbuf);		
     free(ctx);	
@@ -220,6 +226,7 @@ static jboolean libinit(JNIEnv *env, jobject obj, jint sdk) {
 		libmediacb_start = (typeof(libmediacb_start)) dlsym(libhandle,"libmediacb_start");
 		libmediacb_stop = (typeof(libmediacb_stop)) dlsym(libhandle,"libmediacb_stop");
 		libmediacb_write = (typeof(libmediacb_write)) dlsym(libhandle,"libmediacb_write");
+                libmediacb_wait_done = (typeof(libmediacb_wait_done)) dlsym(libhandle,"libmediacb_wait_done");
 	}
     }
     __android_log_print(ANDROID_LOG_INFO,"liblossless","libinit: handle=%p",libhandle);

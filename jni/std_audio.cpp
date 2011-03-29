@@ -196,9 +196,19 @@ void libmediacb_stop(msm_ctx *ctx) {
    }		
 }
 
+
 // free room available in buffer
 static inline int get_free_bytes(msm_ctx *ctx) {
    return (ctx->cbend >= ctx->cbstart) ?  ctx->cbbuf_size - (ctx->cbend - ctx->cbstart) : ctx->cbstart - ctx->cbend;
+}
+
+void libmediacb_wait_done(msm_ctx *ctx) {
+    int k;
+	if(!ctx || ctx->cbstart == -1) return;
+        pthread_mutex_lock(&ctx->cbmutex);
+        k = get_free_bytes(ctx);
+	if(k > 0) pthread_cond_wait(&ctx->cbdone,&ctx->cbmutex);
+	pthread_mutex_unlock(&ctx->cbmutex);
 }
 
 ssize_t libmediacb_write(msm_ctx *ctx, const void *buf, size_t cnt) {
@@ -241,6 +251,7 @@ ssize_t libmediacb_write(msm_ctx *ctx, const void *buf, size_t cnt) {
 }
 
 
+
 // Callback for AudioTrack. 
 // We set no markers and handle AudioTrack::EVENT_MORE_DATA only.
 
@@ -269,6 +280,7 @@ static void cbf(int event, void* user, void *info) {
 		"callback: decoder lags, audiotrack requested too much (%d, avail %d)",buff->size, k);
 	   buff->size  = k; // update if we write less	
 	   if(k == 0) {
+		pthread_cond_signal(&ctx->cbdone);
 		pthread_mutex_unlock(&ctx->cbmutex);
 		return;
 	   }	 
