@@ -202,12 +202,24 @@ static inline int get_free_bytes(msm_ctx *ctx) {
    return (ctx->cbend >= ctx->cbstart) ?  ctx->cbbuf_size - (ctx->cbend - ctx->cbstart) : ctx->cbstart - ctx->cbend;
 }
 
+
 void libmediacb_wait_done(msm_ctx *ctx) {
-    int k;
 	if(!ctx || ctx->cbstart == -1) return;
         pthread_mutex_lock(&ctx->cbmutex);
-        k = get_free_bytes(ctx);
+#if 1
+        int k = get_free_bytes(ctx);
 	if(k > 0) pthread_cond_wait(&ctx->cbdone,&ctx->cbmutex);
+#else
+#define MAX_WAIT_SECONDS 5
+	if(get_free_bytes(ctx) > 0) {
+	    struct timespec   ts;
+	    struct timeval    tp;
+		gettimeofday(&tp,0);
+		ts.tv_sec  = tp.tv_sec + MAX_WAIT_SECONDS;
+		ts.tv_nsec = tp.tv_usec * 1000;
+		pthread_cond_timedwait(&ctx->cbdone,&ctx->cbmutex,&ts);
+	}
+#endif
 	pthread_mutex_unlock(&ctx->cbmutex);
 }
 
