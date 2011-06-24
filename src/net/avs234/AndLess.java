@@ -1951,9 +1951,10 @@ public class AndLess extends Activity implements Comparator<File> {
 					|| (bytes[0] == -2 && bytes[1] == -1);
     	}
 
-    	///////////////////////////////////////////////////////
+       	///////////////////////////////////////////////////////
     	////////////////// Media button events ////////////////
     	
+    	/*
     	public final class MediaButtonReceiver extends BroadcastReceiver {
     		@Override
     		public void onReceive(Context context, Intent intent) {
@@ -1981,7 +1982,7 @@ public class AndLess extends Activity implements Comparator<File> {
   	        	 }
     	      } catch(Exception e) {}   
     		}
-    	}	
+    	} */	
 
 }
 

@@ -70,7 +70,7 @@
 <string name="strMplayerError">媒体播放器错误 </string>
 <string name="strDriverMode">直接访问硬件</string>
 <string name="strSaveBooks">自动保存标签</string>
-<string name="strAbout">andLess Android player for lossless audio files built on Mar 29, 2011</string>
+<string name="strAbout">andLess Android player for lossless audio files built on Jun 24, 2011</string>
 <string name="strAbout1">关于</string>
 <string name="strQuit">退出</string>
 <string name="strHideExt">隐藏文件扩展名</string>

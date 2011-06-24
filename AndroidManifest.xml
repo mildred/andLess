@@ -35,12 +35,12 @@
        		android:exported = "true"
        		android:name=".AndLessSrv"
        		android:process=":remote"/>
-       
-	    <receiver android:name=".AndLess.MediaButtonReceiver">
-    	   	<intent-filter android:priority="83647">
-          		<action android:name="android.intent.action.MEDIA_BUTTON" />
-           	</intent-filter>
-		</receiver>
+		
+		<receiver android:name="RemoteControlReceiver">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
 
 		<activity android:name=".Preferences"
 				  android:launchMode="singleTop"
