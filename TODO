@@ -1,0 +1,4 @@
+libatrack doesn't get compiled.
+It exists in jni/std_audio.cpp
+Look at jni/Android.mk
+
