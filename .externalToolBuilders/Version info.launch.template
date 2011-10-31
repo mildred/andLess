@@ -4,6 +4,6 @@
 <booleanAttribute key="org.eclipse.ui.externaltools.ATTR_BUILDER_ENABLED" value="true"/>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="/usr/bin/perl"/>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_RUN_BUILD_KINDS" value="full,incremental,"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-i /home/avs234/andLess/settime.pl /home/avs234/andLess/res/values-ru/strings.xml /home/avs234/andLess/res/values/strings.xml /home/avs234/andLess/res/values-zh-rCN/strings.xml"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-i ${project_loc}/settime.pl ${project_loc}/res/values-ru/strings.xml ${project_loc}/res/values/strings.xml ${project_loc}/res/values-zh-rCN/strings.xml"/>
 <booleanAttribute key="org.eclipse.ui.externaltools.ATTR_TRIGGERS_CONFIGURED" value="true"/>
 </launchConfiguration>

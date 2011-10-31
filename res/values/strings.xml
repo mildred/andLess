@@ -70,7 +70,7 @@
 <string name="strMplayerError">Media player error </string>
 <string name="strDriverMode">Direct hardware access</string>
 <string name="strSaveBooks">Auto-save bookmarks</string>
-<string name="strAbout">andLess Android player for lossless audio files built on Jun 24, 2011</string>
+<string name="strAbout">andLess Android player for lossless audio files built on Oct 31, 2011</string>
 <string name="strAbout1">About</string>
 <string name="strQuit">Quit</string>
 <string name="strHideExt">Hide filename extensions</string>
